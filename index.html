@@ -961,7 +961,9 @@
   .watch-status.busy { color: var(--accent); font-weight: 700; }
   .watch-status.ok { color: var(--text); }
   .watch-status.warn { color: #E5352B; font-weight: 600; }
-  .watch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .watch-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .wfield { min-width: 0; }
+  .wfield-in input { width: 100%; }
   .wfield label { display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4px; }
   .wfield-in { display: flex; align-items: center; gap: 6px; }
   .wfield-in input { flex: 1; min-width: 0; border: none; background: var(--card); border-radius: 10px; padding: 10px; font: inherit; font-size: 16px; font-weight: 700; color: var(--text); }
