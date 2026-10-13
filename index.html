@@ -951,6 +951,23 @@
   .toast { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 16px - var(--gap-bottom)); }
   .rest-bar { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 12px - var(--gap-bottom)); }
   .sheet { padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+
+  /* ---- Datos del Apple Watch ---- */
+  .watch-box { margin-top: 12px; background: var(--card-3); border-radius: 16px; padding: 12px; }
+  .watch-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .watch-title { font-size: 14px; font-weight: 800; }
+  .watch-import { background: var(--accent); color: #fff; border-radius: 999px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+  .watch-status { font-size: 12.5px; color: var(--text-secondary); margin: 8px 0 10px 0; line-height: 1.4; }
+  .watch-status.busy { color: var(--accent); font-weight: 700; }
+  .watch-status.ok { color: var(--text); }
+  .watch-status.warn { color: #E5352B; font-weight: 600; }
+  .watch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .wfield label { display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4px; }
+  .wfield-in { display: flex; align-items: center; gap: 6px; }
+  .wfield-in input { flex: 1; min-width: 0; border: none; background: var(--card); border-radius: 10px; padding: 10px; font: inherit; font-size: 16px; font-weight: 700; color: var(--text); }
+  .wfield-in input:focus { outline: 2px solid var(--accent); }
+  .wfield-in span { font-size: 12px; color: var(--text-secondary); font-weight: 700; width: 30px; }
+  input.ocr-filled { background: var(--accent-soft) !important; box-shadow: inset 0 0 0 1.5px var(--accent); }
 </style>
 </head>
 <body>
@@ -2555,6 +2572,16 @@ function buildLogForm(exId) {
             <input type="number" inputmode="numeric" id="f0-${exId}" value="${prev ? prev.duration || "" : ""}" placeholder="30"></div>
           <div class="field"><label style="font-size:11px;color:var(--text-secondary);">Que hiciste</label>
             <input type="text" id="f1-${exId}" value="${prev ? prev.note || "" : ""}" placeholder="ej: Padel con Laura"></div>
+        </div>
+        <div class="watch-box">
+          <div class="watch-head">
+            <span class="watch-title">&#8986; Datos del Apple Watch</span>
+            <label class="watch-import">&#128247; Importar captura<input type="file" accept="image/*" multiple id="wimp-${exId}" style="display:none;"></label>
+          </div>
+          <div class="watch-status" id="wstat-${exId}">Sube la captura del resumen del entreno y relleno los datos solos. Puedes subir varias (resumen + frecuencia cardiaca).</div>
+          <div class="watch-grid">${WATCH_FIELDS.map(f => `
+            <div class="wfield"><label>${f.l}</label><div class="wfield-in"><input type="number" inputmode="decimal" step="any" id="wk-${exId}-${f.k}" value="${prev && prev[f.k] !== undefined ? prev[f.k] : ""}" placeholder="&mdash;"><span>${f.u}</span></div></div>`).join("")}
+          </div>
         </div>`;
     } else if (ex.type === "carry") {
       rows += `
@@ -2649,7 +2676,7 @@ function resizeImage(file, maxDim, quality) {
 
 function wireLogForm(exId) {
   const form = document.getElementById(`log-${exId}`);
-  form.querySelectorAll(`[id^="f0-${exId}"], [id^="f1-${exId}"], [id^="f2-${exId}"]`).forEach(el => {
+  form.querySelectorAll(`[id^="f0-${exId}"], [id^="f1-${exId}"], [id^="f2-${exId}"], [id^="wk-${exId}-"]`).forEach(el => {
     el.addEventListener("input", () => { markSetRows(exId); scheduleAutosave(exId); });
     el.addEventListener("change", () => scheduleAutosave(exId, 150));
   });
@@ -2661,6 +2688,9 @@ function wireLogForm(exId) {
       rerenderExerciseForm(exId);
     });
   });
+
+  const wimp = document.getElementById(`wimp-${exId}`);
+  if (wimp) wimp.addEventListener("change", e => { const files = Array.from(e.target.files || []); wimp.value = ""; if (files.length) importWatchShots(exId, files); });
 
   const copyBtn = form.querySelector(`[data-copy-last="${exId}"]`);
   if (copyBtn) copyBtn.addEventListener("click", () => copyLastSession(exId));
@@ -2827,7 +2857,10 @@ function collectSets(exId) {
       if (duration) sets.push({ duration, rpe });
     } else if (ex.type === "activity") {
       const duration = val(`f0-${exId}`), note = val(`f1-${exId}`);
-      if (duration || note) sets.push({ duration, note });
+      const st = { duration, note };
+      let any = false;
+      WATCH_FIELDS.forEach(f => { const v = val(`wk-${exId}-${f.k}`); if (v !== "") { st[f.k] = v; any = true; } });
+      if (duration || note || any) sets.push(st);
     } else if (ex.type === "carry") {
       const weight = val(`f0-${exId}-${i}`), distance = val(`f1-${exId}-${i}`);
       if (weight || distance) sets.push({ weight, distance });
@@ -2942,7 +2975,16 @@ function metricsFor(type) {
     { key: "top", label: "Peso max", unit: "kg", fn: sets => { const w = nums(sets, "weight"); return w.length ? Math.max(...w) : NaN; } },
     { key: "dist", label: "Metros", unit: "m", fn: sets => { const d = nums(sets, "distance"); return d.length ? sum(d) : NaN; } }
   ];
-  if (type === "cardio" || type === "activity") return [
+  if (type === "activity") return [
+    { key: "min", label: "Minutos", unit: "min", fn: sets => { const d = nums(sets, "duration"); return d.length ? sum(d) : NaN; } },
+    { key: "kcal", label: "Kcal activas", unit: "kcal", fn: sets => { const d = nums(sets, "kcalActive"); return d.length ? sum(d) : NaN; } },
+    { key: "hr", label: "FC media", unit: "lpm", fn: sets => { const d = nums(sets, "hrAvg"); return d.length ? Math.max(...d) : NaN; } },
+    { key: "hrmax", label: "FC maxima", unit: "lpm", fn: sets => { const d = nums(sets, "hrMax"); return d.length ? Math.max(...d) : NaN; } },
+    { key: "kcalt", label: "Kcal totales", unit: "kcal", fn: sets => { const d = nums(sets, "kcalTotal"); return d.length ? sum(d) : NaN; } },
+    { key: "dist", label: "Distancia", unit: "km", fn: sets => { const d = nums(sets, "distance"); return d.length ? sum(d) : NaN; } },
+    { key: "eff", label: "Esfuerzo", unit: "/10", fn: sets => { const d = nums(sets, "effort"); return d.length ? Math.max(...d) : NaN; } }
+  ];
+  if (type === "cardio") return [
     { key: "min", label: "Minutos", unit: "min", fn: sets => { const d = nums(sets, "duration"); return d.length ? sum(d) : NaN; } }
   ];
   return [
@@ -2970,7 +3012,11 @@ function seriesFor(exId, metric) {
 function setChipsHtml(type, sets) {
   if (!sets || !sets.length) return "";
   if (type === "cardio") return sets.map(st => `<span class="chip">${st.duration || "?"} min${st.rpe ? " &middot; " + st.rpe : ""}</span>`).join("");
-  if (type === "activity") return sets.map(st => `<span class="chip">${st.duration ? st.duration + " min" : ""}${st.duration && st.note ? " &middot; " : ""}${st.note || ""}</span>`).join("");
+  if (type === "activity") return sets.map(st => `<span class="chip">${st.duration ? st.duration + " min" : ""}${st.duration && st.note ? " &middot; " : ""}${st.note || ""}</span>` +
+      (st.kcalActive ? `<span class="chip">&#128293; ${st.kcalActive} kcal</span>` : "") +
+      (st.hrAvg ? `<span class="chip">&#10084;&#65039; ${st.hrAvg}${st.hrMax ? "/" + st.hrMax : ""} lpm</span>` : "") +
+      (st.distance ? `<span class="chip">${String(st.distance).replace(".", ",")} km</span>` : "") +
+      (st.effort ? `<span class="chip">Esfuerzo ${st.effort}</span>` : "")).join("");
   const ws = sets.map(st => numVal(st.weight)).filter(n => !isNaN(n));
   const top = ws.length ? Math.max(...ws) : NaN;
   let topMarked = false;
@@ -3015,7 +3061,7 @@ function renderProgress(exId) {
   const pane = document.getElementById(`prog-${exId}`);
   if (!pane) return;
   const ex = EXERCISE_INDEX[exId];
-  const metrics = metricsFor(ex.type);
+  const metrics = metricsFor(ex.type).filter((m, i) => i === 0 || seriesFor(exId, m).length);
   let metric = metrics.find(m => m.key === metricByEx[exId]) || metrics[0];
   const all = seriesFor(exId, metric);
   const pts = all.slice(-12);
@@ -3786,6 +3832,211 @@ document.getElementById("bodyNewBtn").addEventListener("click", () => openBodySh
   document.addEventListener("touchend", release, { passive: true });
   document.addEventListener("touchcancel", release, { passive: true });
 })();
+
+// ---------- Importar capturas del Apple Watch (lectura de texto en el propio movil) ----------
+const WATCH_FIELDS = [
+  { k: "kcalActive", l: "Kcal activas", u: "kcal" }, { k: "kcalTotal", l: "Kcal totales", u: "kcal" },
+  { k: "hrAvg", l: "FC media", u: "lpm" }, { k: "hrMax", l: "FC maxima", u: "lpm" }, { k: "hrMin", l: "FC minima", u: "lpm" },
+  { k: "distance", l: "Distancia", u: "km" }, { k: "effort", l: "Esfuerzo", u: "/10" }
+];
+// Lee el texto de una captura de resumen del Apple Watch / app Fitness y saca las metricas.
+// opts.fallback = false: solo datos con etiqueta (para leer cada columna por separado).
+function parseWatchText(raw, opts) {
+  const fallback = !opts || opts.fallback !== false;
+  const norm = String(raw || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
+    .replace(/[|]/g, " ").replace(/[–—]/g, "-");
+  const lines = norm.split(/\n+/).map(l => l.replace(/\s+/g, " ").trim()
+    .replace(/(\d{2,3})8\s?pm\b/g, "$1 bpm")                                  // "1448pm" -> "144 bpm" (B leida como 8)
+    .replace(/(\d{2,3})\s?[.,]pm\b/g, "$1 lpm")                               // "142.pm" -> "142 lpm"
+    .replace(/(^|[^:\d])(\d{1,2}) (\d)(?=\s*(?:lpm|bpm|ppm|k?cal))/g, "$1$2$3") // "17 1lpm" -> "171lpm"
+    .replace(/(\d)[il](?=\d)/g, "$11").replace(/(^|[^a-z])[il](?=\d{2})/g, "$11")).filter(Boolean);
+  const out = {};
+  const num = s => parseFloat(String(s).replace(/(\d)[.,](\d{3})(?!\d)/, "$1$2").replace(",", "."));
+  // etiqueta y valor en la misma linea (tras la etiqueta) o en las siguientes; la etiqueta puede partirse en 2 lineas
+  const near = (labelRe, valueRe, span) => {
+    span = span === undefined ? 2 : span;
+    for (let i = 0; i < lines.length; i++) {
+      let lm = lines[i].match(labelRe), start = i, rest;
+      if (lm) rest = lines[i].slice(lm.index + lm[0].length);
+      else if (i + 1 < lines.length && !labelRe.test(lines[i + 1])) {
+        const both = lines[i] + " " + lines[i + 1];
+        lm = both.match(labelRe);
+        if (!lm || lm.index + lm[0].length <= lines[i].length) continue;
+        start = i + 1; rest = both.slice(lm.index + lm[0].length);
+      } else continue;
+      // si la etiqueta no es la primera de su linea (dos columnas), en la linea de valores tomamos el ultimo
+      const secondCol = lm.index > 2 && start === i;
+      for (let j = start; j <= Math.min(lines.length - 1, start + span); j++) {
+        if (j === start) { const m = rest.match(valueRe); if (m) return m; continue; }
+        const all = Array.from(lines[j].matchAll(new RegExp(valueRe.source, "g")));
+        if (secondCol) { if (all.length >= 2) return all[all.length - 1]; if (all.length) return null; continue; }
+        if (all.length) return all[0];
+      }
+    }
+    return null;
+  };
+  const TIME = /(\d{1,2})[:.](\d{2})(?:[:.](\d{2}))?/;
+  const toMin = m => m[3] !== undefined ? (+m[1]) * 60 + (+m[2]) + (+m[3]) / 60 : (+m[1]) + (+m[2]) / 60;
+  const KCAL = /(\d{1,4}(?:[.,]\d{3})?)\s*k?ca(?:l|1|i|\.|\b|$)/;
+  const BPM = /(\d{2,3})\s*(?:lpm|bpm|ppm)?/;
+  const okHr = v => v >= 40 && v <= 230;
+
+  let m = near(/tiempo de entrenamiento|workout time|tiempo total|total time|duracion|duration/, TIME)
+       || near(/tiempo transcurrido|elapsed time/, TIME);
+  if (m) out.duration = Math.round(toMin(m));
+  m = near(/(?:calorias|kcal|kilocalorias|cal) activas|active (?:kilo)?cal(?:ories)?/, KCAL);
+  if (m) out.kcalActive = num(m[1]);
+  m = near(/(?:calorias|kcal|kilocalorias) totales|total (?:kilo)?cal(?:ories)?/, KCAL);
+  if (m) out.kcalTotal = num(m[1]);
+  const HRL = /frecuencia cardiaca media|frec\.? cardiaca media|fc media|fc prom|frecuencia cardiaca promedio|avg\.? heart rate|average heart rate/;
+  m = near(HRL, /(\d{2,3})\s*(?:lpm|bpm|ppm)/) || near(HRL, BPM);
+  if (m && okHr(+m[1])) out.hrAvg = +m[1];
+  m = near(/(?:frecuencia cardiaca maxima|fc max(?:ima)?|max(?:imum)?\.? heart rate|max hr)/, BPM);
+  if (m && okHr(+m[1])) out.hrMax = +m[1];
+  m = near(/\b(?:rango|range)\b/, /(\d{2,3})\s*-\s*(\d{2,3})/);
+  if (m && okHr(+m[1]) && okHr(+m[2])) { out.hrMin = +m[1]; out.hrMax = out.hrMax || +m[2]; }
+  m = near(/distancia|distance/, /(\d+(?:[.,]\d+)?)\s*(km|mi)\b/);
+  if (m) out.distance = Math.round((m[2] === "mi" ? num(m[1]) * 1.609 : num(m[1])) * 100) / 100;
+  // esfuerzo: "moderado 6", "hard 8" o el numero solo, nunca dentro de una hora
+  for (let i = 0; i < lines.length && out.effort === undefined; i++) {
+    if (!/esfuerzo|effort/.test(lines[i])) continue;
+    for (let j = i; j <= Math.min(lines.length - 1, i + 2); j++) {
+      const seg = j === i ? lines[i].replace(/.*(?:esfuerzo|effort)/, "") : lines[j];
+      const e = seg.trim().match(/^(?:[a-z]+\s)?(10|[1-9])(?:\s*\/\s*10)?$/);
+      if (e) { out.effort = +e[1]; break; }
+    }
+  }
+  if (!fallback) return out;
+
+  // ---- solo con el texto completo: datos sin etiqueta ----
+  // "144 bpm avg" / "144 lpm de media"
+  if (out.hrAvg === undefined) { const a = norm.match(/(\d{2,3})\s*(?:bpm|lpm|ppm)\s*(?:avg|media|de media|prom)/); if (a && okHr(+a[1])) out.hrAvg = +a[1]; }
+  // grafica de pulso: los numeros sueltos del lateral son el maximo y el minimo
+  if (out.hrMax === undefined) {
+    const hi = lines.findIndex(l => /^(?:heart rate|frecuencia cardiaca)\b/.test(l));
+    if (hi >= 0) {
+      const vals = lines.slice(hi + 1, hi + 9).filter(l => /^\d{2,3}$/.test(l)).map(Number).filter(okHr);
+      if (vals.length >= 2) { out.hrMax = Math.max(...vals); out.hrMin = out.hrMin || Math.min(...vals); }
+    }
+  }
+  if (out.kcalActive === undefined || out.kcalTotal === undefined) {
+    const all = (norm.match(/\d{2,4}\s*k?cal\b/g) || []).map(x => num(x));
+    if (out.kcalActive === undefined && all.length) out.kcalActive = Math.min(...all);
+    if (out.kcalTotal === undefined && all.length >= 2) { const mx = Math.max(...all); if (mx > (out.kcalActive || 0)) out.kcalTotal = mx; }
+  }
+  if (out.hrAvg === undefined) { const hb = norm.match(/(\d{2,3})\s*(?:lpm|bpm|ppm)\b/); if (hb && okHr(+hb[1])) out.hrAvg = +hb[1]; }
+  if (out.duration === undefined) { const tm = norm.match(/\b(\d):(\d{2}):(\d{2})\b/); if (tm) out.duration = Math.round(toMin(tm)); }
+
+  // fecha del entreno
+  const MES = { ene: 1, jan: 1, feb: 2, mar: 3, abr: 4, apr: 4, may: 5, jun: 6, jul: 7, ago: 8, aug: 8, sep: 9, set: 9, oct: 10, nov: 11, dic: 12, dec: 12 };
+  const now = new Date();
+  let d = norm.match(/\b(\d{1,2})\s*(?:de\s*)?(ene|feb|mar|abr|may|jun|jul|ago|sep|set|oct|nov|dic)[a-z]*\.?(?:\s*(?:de\s*)?(\d{4}))?/);
+  let day, mon, yr;
+  if (d) { day = +d[1]; mon = MES[d[2]]; yr = d[3] ? +d[3] : null; }
+  else {
+    d = norm.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*(\d{1,2})\b(?:,?\s*(\d{4}))?/);
+    if (d) { mon = MES[d[1]]; day = +d[2]; yr = d[3] ? +d[3] : null; }
+    else if (/\b(?:hoy|today)\b/.test(norm)) { day = now.getDate(); mon = now.getMonth() + 1; yr = now.getFullYear(); }
+    else if (/\b(?:ayer|yesterday)\b/.test(norm)) { const y = new Date(now); y.setDate(y.getDate() - 1); day = y.getDate(); mon = y.getMonth() + 1; yr = y.getFullYear(); }
+  }
+  if (day && mon && day <= 31) {
+    if (!yr) { yr = now.getFullYear(); if (new Date(yr, mon - 1, day) > now) yr--; }
+    const pad2 = n => (n < 10 ? "0" : "") + n;
+    out.dateKey = yr + "-" + pad2(mon) + "-" + pad2(day);
+  }
+  return out;
+}
+// lee varias pasadas (columna izquierda, derecha, completa) y las combina
+function mergeWatchReads(halfTexts, fullText) {
+  const res = {};
+  const add = o => { for (const k in o) if (res[k] === undefined && o[k] !== undefined && (typeof o[k] === "string" || !isNaN(o[k]))) res[k] = o[k]; };
+  halfTexts.forEach(t => add(parseWatchText(t, { fallback: false })));
+  add(parseWatchText(fullText, { fallback: false }));
+  add(parseWatchText(fullText));
+  return res;
+}
+
+
+let tesseractLoading = null;
+function loadTesseract() {
+  if (window.Tesseract) return Promise.resolve();
+  if (!tesseractLoading) tesseractLoading = new Promise((ok, ko) => {
+    const sc = document.createElement("script");
+    sc.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+    sc.onload = ok; sc.onerror = () => { tesseractLoading = null; ko(new Error("no se pudo cargar el lector")); };
+    document.head.appendChild(sc);
+  });
+  return tesseractLoading;
+}
+// pasa la captura a texto negro sobre fondo blanco (el texto de color sobre negro se lee mal)
+function prepareShot(file) {
+  return new Promise((ok, ko) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, w, h);
+      const d = ctx.getImageData(0, 0, w, h), px = d.data;
+      let sum = 0; for (let i = 0; i < px.length; i += 400) sum += Math.max(px[i], px[i + 1], px[i + 2]);
+      const darkBg = sum / (px.length / 400) < 128;
+      for (let i = 0; i < px.length; i += 4) {
+        const mx = Math.max(px[i], px[i + 1], px[i + 2]);
+        const ink = darkBg ? mx > 110 : mx < 140;
+        const v = ink ? 0 : 255; px[i] = px[i + 1] = px[i + 2] = v;
+      }
+      ctx.putImageData(d, 0, 0);
+      URL.revokeObjectURL(img.src);
+      ok({ canvas: c, w, h });
+    };
+    img.onerror = () => ko(new Error("no se pudo abrir la imagen"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+async function importWatchShots(exId, files) {
+  const st = document.getElementById(`wstat-${exId}`);
+  const say = (t, cls) => { if (st) { st.innerHTML = t; st.className = "watch-status" + (cls ? " " + cls : ""); } };
+  try {
+    say("Preparando el lector de texto... (la primera vez tarda un poco)", "busy");
+    await loadTesseract();
+    const worker = await Tesseract.createWorker(["spa", "eng"]);
+    const res = {};
+    for (let n = 0; n < files.length; n++) {
+      say(`Leyendo captura ${n + 1} de ${files.length}...`, "busy");
+      const { canvas, w, h } = await prepareShot(files[n]);
+      // dos columnas por separado (asi no se mezclan datos de lado a lado) y luego la imagen entera
+      const halves = [];
+      for (const r of [{ left: 0, top: 0, width: Math.floor(w / 2), height: h }, { left: Math.floor(w / 2), top: 0, width: w - Math.floor(w / 2), height: h }]) {
+        halves.push((await worker.recognize(canvas, { rectangle: r })).data.text);
+      }
+      const one = mergeWatchReads(halves, (await worker.recognize(canvas)).data.text);
+      for (const k in one) if (res[k] === undefined) res[k] = one[k];
+    }
+    await worker.terminate();
+    // si la captura trae fecha y no es la del formulario, pasamos el registro a ese dia
+    let dateNote = "";
+    const todayKey = dateKeyFor(new Date());
+    const curKey = editingDateByEx[exId] ? editingDateByEx[exId].dateKey : todayKey;
+    if (res.dateKey && res.dateKey !== curKey && res.dateKey <= todayKey) {
+      flushAllPending();
+      const dl = labelFor(new Date(res.dateKey + "T00:00:00"));
+      if (res.dateKey === todayKey) delete editingDateByEx[exId]; else editingDateByEx[exId] = { dateKey: res.dateKey, dateLabel: dl };
+      rerenderExerciseForm(exId);
+      dateNote = ` Lo he guardado en el <b>${dl}</b>, la fecha de la captura.`;
+    }
+    const filled = [];
+    const setVal = (id, v, label) => { const el = document.getElementById(id); if (el && v !== undefined) { el.value = v; el.classList.add("ocr-filled"); filled.push(label); } };
+    setVal(`f0-${exId}`, res.duration, res.duration + " min");
+    WATCH_FIELDS.forEach(f => setVal(`wk-${exId}-${f.k}`, res[f.k], (res[f.k] !== undefined ? res[f.k] + " " + f.u : "")));
+    if (!filled.length) { say("No he encontrado datos en la captura. Prueba con la pantalla de resumen del entreno, o rellena los campos a mano.", "warn"); return; }
+    const st2 = document.getElementById(`wstat-${exId}`);
+    if (st2) { st2.innerHTML = `&#10003; Leido: ${filled.join(" &middot; ")}.${dateNote} <b>Revisa que este bien</b>; los campos en azul los he rellenado yo.`; st2.className = "watch-status ok"; }
+    scheduleAutosave(exId, 200);
+  } catch (e) {
+    console.error(e);
+    say("No se pudo leer la captura (" + (e && e.message ? e.message : "error") + "). Rellena los datos a mano o prueba de nuevo con conexion.", "warn");
+  }
+}
 
 (function setupInstallCard() {
   const standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
