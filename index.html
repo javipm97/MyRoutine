@@ -616,6 +616,86 @@
   .set-row { gap: 8px; }
   .set-head { gap: 8px; }
   .chip small.rir { font-size: 10.5px; font-weight: 700; opacity: 0.7; margin-left: 5px; }
+
+  /* ---- Pantalla de ejercicios ---- */
+  .xm-section { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 4px; }
+  .xm-section.small { margin-top: 22px; }
+  .xm-head { display: flex; align-items: center; gap: 10px; padding: 15px 16px; cursor: pointer; }
+  .xm-head-info { flex: 1; min-width: 0; }
+  .xm-title { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+  .xm-sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+  .xm-chev { color: var(--text-secondary); font-size: 24px; line-height: 1; transition: transform 0.2s; transform: rotate(90deg); }
+  .open > .xm-head .xm-chev, .xm-day.open .xm-chev { transform: rotate(-90deg); }
+  .pill.small { padding: 6px 12px; font-size: 13px; }
+  .xm-body { border-top: 1px solid var(--separator); }
+  .lib-row, .day-row { display: flex; align-items: center; gap: 10px; padding: 11px 14px 11px 8px; border-bottom: 1px solid var(--separator); background: var(--card); cursor: pointer; }
+  .xm-body .lib-row:last-child { border-bottom: none; }
+  .lib-row.archived { padding-left: 16px; opacity: 0.7; cursor: default; }
+  .drag-handle {
+    width: 34px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: var(--text-secondary); touch-action: none; cursor: grab; border-radius: 10px; user-select: none; -webkit-user-select: none;
+  }
+  .drag-handle:active { background: var(--accent-soft); color: var(--accent); }
+  .lib-info { flex: 1; min-width: 0; display: block; }
+  .lib-name { display: block; font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lib-meta { display: block; font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+  .day-tags { display: flex; gap: 4px; flex-shrink: 0; }
+  .dtag { font-size: 11px; font-weight: 800; padding: 3px 7px; border-radius: 7px; color: #fff; }
+  .dtag.upper { background: var(--brand); }
+  .dtag.lower { background: var(--lower); }
+  .dtag.none { background: var(--card-3); color: var(--text-secondary); font-weight: 700; }
+
+  .xm-day { background: var(--card); border-radius: 20px; box-shadow: var(--shadow); overflow: hidden; margin-bottom: 12px; transition: box-shadow 0.15s, transform 0.15s; }
+  .xm-day.drop-hover { box-shadow: 0 0 0 3px var(--accent), var(--shadow); transform: scale(1.01); }
+  .xm-day-head { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px 16px; color: #fff; cursor: pointer; overflow: hidden; }
+  .xm-day-head.upper { background: linear-gradient(120deg, var(--brand-deep), var(--brand) 50%, var(--brand-2)); }
+  .xm-day-head.lower { background: linear-gradient(120deg, #064B35, var(--lower) 50%, var(--lower-2)); }
+  .xm-day-head::before { content: ""; position: absolute; inset: 0; opacity: 0.1; background: repeating-linear-gradient(135deg, #fff 0 2px, transparent 2px 14px); pointer-events: none; }
+  .xm-day-emoji { font-size: 28px; position: relative; }
+  .xm-day-info { flex: 1; min-width: 0; position: relative; }
+  .xm-day-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+  .xm-day-sub { font-size: 12.5px; opacity: 0.85; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .xm-day-head .xm-chev { color: #fff; position: relative; }
+  .row-num { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .icon-btn { width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--card-3); color: var(--text-secondary); font-size: 20px; font-weight: 600; cursor: pointer; flex-shrink: 0; line-height: 1; }
+  .icon-btn.remove:active { background: rgba(255,59,48,0.15); color: #FF3B30; }
+  .xm-add { display: block; width: calc(100% - 24px); margin: 10px 12px 12px 12px; padding: 11px; border-radius: 14px; border: 1.5px dashed var(--accent); background: var(--accent-soft); color: var(--accent); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .xm-empty { font-size: 13px; color: var(--text-secondary); padding: 16px; text-align: center; }
+  .drop-line { height: 3px; background: var(--accent); border-radius: 3px; margin: 0 12px; }
+  .drag-ghost { position: fixed; z-index: 90; pointer-events: none; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.25); transform: scale(1.03); opacity: 0.95; border: none; }
+  .dragging-src { opacity: 0.35; }
+  body.is-dragging { user-select: none; -webkit-user-select: none; }
+  body.is-dragging .tabbar { opacity: 0; pointer-events: none; transform: translateY(20px); }
+  .tabbar { transition: opacity 0.15s, transform 0.15s; }
+
+  /* hojas inferiores */
+  .sheet-overlay { position: fixed; inset: 0; z-index: 80; background: rgba(5,8,25,0); transition: background 0.2s; display: flex; align-items: flex-end; justify-content: center; }
+  .sheet-overlay.open { background: rgba(5,8,25,0.45); }
+  .sheet {
+    width: 100%; max-width: 560px; max-height: 86vh; overflow-y: auto; background: var(--card); color: var(--text);
+    border-radius: 26px 26px 0 0; padding: 8px 18px calc(18px + env(safe-area-inset-bottom, 0px)) 18px;
+    transform: translateY(100%); transition: transform 0.22s ease;
+  }
+  .sheet-overlay.open .sheet { transform: translateY(0); }
+  .sheet-grab { width: 40px; height: 5px; border-radius: 3px; background: var(--separator); margin: 4px auto 12px auto; }
+  .sheet-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+  .sheet-hint { font-size: 13px; color: var(--text-secondary); margin: -6px 0 10px 0; }
+  .sheet-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin: 12px 0 6px 0; }
+  .sheet-input { width: 100%; border: none; background: var(--card-3); border-radius: 12px; padding: 12px; font: inherit; font-size: 16px; color: var(--text); }
+  .sheet-input:focus { outline: 2px solid var(--accent); }
+  .sheet-static { padding: 12px 0; font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+  .sheet-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .day-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .day-chip { border: 1.5px solid var(--separator); background: var(--card); color: var(--text); border-radius: 14px; padding: 11px 10px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; text-align: left; }
+  .day-chip.on.upper { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .day-chip.on.lower { background: var(--lower); border-color: var(--lower); color: #fff; }
+  .sheet-primary { width: 100%; margin-top: 18px; padding: 14px; border: none; border-radius: 999px; background: var(--accent); color: #fff; font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; }
+  .sheet-danger { width: 100%; margin-top: 8px; padding: 12px; border: none; border-radius: 999px; background: none; color: #FF3B30; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .pick-list { max-height: 52vh; overflow-y: auto; border-radius: 16px; background: var(--card-3); }
+  .pick-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-bottom: 1px solid var(--separator); background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+  .pick-row:last-child { border-bottom: none; }
+  .pick-check { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--accent-soft); color: var(--accent); font-weight: 800; font-size: 16px; }
+  .pick-row.on .pick-check { background: var(--green); color: #fff; }
 </style>
 </head>
 <body>
@@ -924,7 +1004,36 @@ function rebuildIndexFrom(days) {
 }
 rebuildIndexFrom(BASE_ROUTINE);
 
+function defOf(id) {
+  const c = cache[id] || {};
+  const m = c.meta || {};
+  const base = BASE_DEFS[id];
+  if (base) return m.target ? Object.assign({}, base, { target: m.target }) : base;
+  if (m.isCustom) return { id, name: c.customName || "Ejercicio", target: m.target || "3x10", type: m.type || "sets" };
+  return null;
+}
+function isArchived(id) { const m = cache[id] && cache[id].meta; return !!(m && m.active === false); }
+function ensurePlan() {
+  if (!settingsCache.dayPlan) {
+    settingsCache.dayPlan = {};
+    LIVE_DAYS.forEach(d => { settingsCache.dayPlan[d.id] = d.exercises.map(e => e.id); });
+  }
+  BASE_ROUTINE.forEach(d => { if (!settingsCache.dayPlan[d.id]) settingsCache.dayPlan[d.id] = []; });
+  return settingsCache.dayPlan;
+}
+
 function rebuildLiveRoutine() {
+  if (settingsCache.dayPlan) {
+    LIVE_DAYS = BASE_ROUTINE.map(day => {
+      const ids = settingsCache.dayPlan[day.id] || [];
+      const exercises = ids.map(defOf).filter(e => e && !isArchived(e.id));
+      exercises.forEach(e => { if (!STATIC_DAY_OF_EXERCISE[e.id]) STATIC_DAY_OF_EXERCISE[e.id] = day; });
+      return Object.assign({}, day, { exercises });
+    });
+    rebuildIndexFrom(LIVE_DAYS);
+    renderDayList();
+    return;
+  }
   LIVE_DAYS = BASE_ROUTINE.map(day => {
     const activeBase = day.exercises.filter(ex => {
       const m = cache[ex.id] && cache[ex.id].meta;
@@ -1145,10 +1254,12 @@ function getLastEntry(exId) {
   return (h && h.length > 0) ? h[0] : null;
 }
 
-function upsertHistory(exId, dateKey, dateLabel, sets) {
+function upsertHistory(exId, dateKey, dateLabel, sets, dayId) {
   const h = cache[exId].history;
   const idx = h.findIndex(e => e.dateKey === dateKey);
   const entry = { dateKey, dateLabel, sets };
+  const keepDay = dayId || (idx >= 0 && h[idx].dayId);
+  if (keepDay) entry.dayId = keepDay;
   if (idx >= 0) h[idx] = entry; else h.unshift(entry);
   h.sort((a, b) => b.dateKey.localeCompare(a.dateKey));
   cache[exId].history = h.slice(0, 400);
@@ -1158,13 +1269,20 @@ function upsertHistory(exId, dateKey, dateLabel, sets) {
 let calRef = new Date();
 calRef.setDate(1);
 
+function dayForEntry(exId, entry) {
+  if (entry && entry.dayId) {
+    const d = BASE_ROUTINE.concat(EXTRA_DAYS).find(x => x.id === entry.dayId);
+    if (d) return d;
+  }
+  return STATIC_DAY_OF_EXERCISE[exId] || null;
+}
 function buildTrainedDatesForMonth(year, month) {
   const map = {}; // dateKey -> { hasUpper, hasLower }
   Object.keys(cache).forEach(exId => {
-    const day = STATIC_DAY_OF_EXERCISE[exId];
-    if (!day) return; // unknown/settings row — skip rather than crash
     (cache[exId].history || []).forEach(entry => {
       if (!entry || typeof entry.dateKey !== "string") return;
+      const day = dayForEntry(exId, entry);
+      if (!day) return;
       const d = entry.dateKey.split("-");
       if (parseInt(d[0], 10) === year && parseInt(d[1], 10) === month + 1) {
   if (!map[entry.dateKey]) map[entry.dateKey] = { hasUpper: false, hasLower: false, hasExtra: false };
@@ -1269,7 +1387,7 @@ function openDetail(dateKey) {
     const entry = (cache[exId].history || []).find(e => e.dateKey === dateKey);
     if (entry) {
       items.push({ exId, entry });
-      dayRef = DAY_OF_EXERCISE[exId];
+      dayRef = dayForEntry(exId, entry) || dayRef;
     }
   });
 
@@ -1298,6 +1416,7 @@ function openDetail(dateKey) {
 function lastDateForDay(day) {
   let best = null;
   day.exercises.forEach(ex => (cache[ex.id] && cache[ex.id].history || []).forEach(e => {
+    if (e && e.dayId && e.dayId !== day.id) return;
     if (e && e.dateKey && (!best || e.dateKey > best)) best = e.dateKey;
   }));
   return best;
@@ -1378,10 +1497,10 @@ function renderHome() {
   // que se hizo cada dia de esta semana
   const info = {};
   Object.keys(cache).forEach(exId => {
-    const day = STATIC_DAY_OF_EXERCISE[exId];
-    if (!day) return;
     (cache[exId].history || []).forEach(e => {
       if (!e || keys.indexOf(e.dateKey) < 0) return;
+      const day = dayForEntry(exId, e);
+      if (!day) return;
       info[e.dateKey] = info[e.dateKey] || {};
       info[e.dateKey][day.badge] = true;
     });
@@ -1444,6 +1563,7 @@ document.getElementById("tabHome").addEventListener("click", () => showView("vie
 document.getElementById("tabCal").addEventListener("click", () => { renderCalendar(); showView("view-cal"); });
 
 document.getElementById("manageExercisesBtn").addEventListener("click", () => {
+  resetExUi();
   renderExerciseManagement();
   showView("view-exercises");
 });
@@ -1513,130 +1633,348 @@ function refreshDayProgress() {
 }
 
 // ---------- Exercise management ----------
-function renderExerciseManagement() {
-  const container = document.getElementById("exerciseManagementList");
-  container.innerHTML = "";
-  BASE_ROUTINE.forEach(day => {
-    const group = document.createElement("div");
-    group.className = "ex-day-group";
-    const liveDay = LIVE_DAYS.find(d => d.id === day.id);
-    const activeList = liveDay ? liveDay.exercises : [];
-    const allForDay = day.exercises.concat(customExercisesByDay[day.id] || []);
-    const activeIds = new Set(activeList.map(ex => ex.id));
-    const archivedList = allForDay.filter(ex => !activeIds.has(ex.id));
-    const shortTitle = day.title.replace(/\s*&middot;.*/, "").trim();
+const exUi = { lib: true, archived: false, days: {} };
+function resetExUi() { exUi.lib = true; exUi.archived = false; exUi.days = {}; }
+function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+const TYPE_LABEL = { sets: "Peso + reps", carry: "Peso + distancia", cardio: "Cardio" };
+function shortDay(day) { const m = plain(day.title).match(/Dia\s*(\d+)/); return m ? "D" + m[1] : plain(day.title); }
 
-    let rowsHtml = `<div class="ex-day-header">${day.title.replace(/&middot;/, "\u00b7")}</div>`;
-
-    activeList.forEach((ex, idx) => {
-      const last = getLastEntry(ex.id);
-      const lastText = last ? `Ultima vez: ${last.dateLabel} &middot; ${formatSetsSummary(ex.type, last.sets)}` : "Sin registros";
-      rowsHtml += `
-        <div class="ex-row">
-          <div class="ex-reorder">
-            <button class="ex-order-btn" type="button" data-move="${day.id}|${ex.id}|-1" ${idx === 0 ? "disabled" : ""}>&#9650;</button>
-            <button class="ex-order-btn" type="button" data-move="${day.id}|${ex.id}|1" ${idx === activeList.length - 1 ? "disabled" : ""}>&#9660;</button>
-          </div>
-          <div class="ex-row-info">
-            <div class="ex-row-name">${displayName(ex.id)}</div>
-            <div class="ex-row-last">${lastText.replace(/&middot;/, "\u00b7")}</div>
-          </div>
-          <button class="ex-toggle-btn" data-toggle-ex="${ex.id}">Archivar</button>
-        </div>`;
-    });
-
-    if (archivedList.length > 0) {
-      rowsHtml += `<div class="ex-archived-label">Archivados</div>`;
-      archivedList.forEach(ex => {
-        const last = getLastEntry(ex.id);
-        const lastText = last ? `Ultima vez: ${last.dateLabel} &middot; ${formatSetsSummary(ex.type, last.sets)}` : "Sin registros";
-        rowsHtml += `
-          <div class="ex-row archived">
-            <div class="ex-row-info">
-              <div class="ex-row-name">${displayName(ex.id)}</div>
-              <div class="ex-row-last">${lastText.replace(/&middot;/, "\u00b7")}</div>
-            </div>
-            <button class="ex-toggle-btn is-active" data-toggle-ex="${ex.id}">Reactivar</button>
-          </div>`;
-      });
-    }
-
-    rowsHtml += `
-      <div class="add-ex-toggle" data-add-day="${day.id}">+ Anadir ejercicio a ${shortTitle}</div>
-      <div class="add-ex-form" id="addExForm-${day.id}" style="display:none;">
-        <div class="add-ex-row">
-          <input type="text" id="addExName-${day.id}" placeholder="Nombre del ejercicio">
-        </div>
-        <div class="add-ex-row">
-          <select id="addExType-${day.id}">
-            <option value="sets">Peso + reps</option>
-            <option value="carry">Peso + distancia</option>
-            <option value="cardio">Cardio (minutos)</option>
-          </select>
-          <input type="text" id="addExTarget-${day.id}" placeholder="ej: 3x10" value="3x10">
-        </div>
-        <button class="add-ex-btn" type="button" data-confirm-add="${day.id}">Anadir</button>
-      </div>`;
-    group.innerHTML = rowsHtml;
-    container.appendChild(group);
+function libraryIds() {
+  const ids = [];
+  BASE_ROUTINE.forEach(d => d.exercises.forEach(e => { if (ids.indexOf(e.id) < 0) ids.push(e.id); }));
+  Object.keys(cache).forEach(id => {
+    const m = cache[id] && cache[id].meta;
+    if (m && m.isCustom && ids.indexOf(id) < 0) ids.push(id);
   });
-
-  container.querySelectorAll("[data-toggle-ex]").forEach(btn => {
-    btn.addEventListener("click", () => toggleExerciseActive(btn.getAttribute("data-toggle-ex")));
-  });
-  container.querySelectorAll("[data-move]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const [dayId, exId, dir] = btn.getAttribute("data-move").split("|");
-      moveExercise(dayId, exId, parseInt(dir, 10));
-    });
-  });
-  container.querySelectorAll("[data-add-day]").forEach(el => {
-    el.addEventListener("click", () => {
-      const form = document.getElementById(`addExForm-${el.getAttribute("data-add-day")}`);
-      form.style.display = form.style.display === "none" ? "block" : "none";
-    });
-  });
-  container.querySelectorAll("[data-confirm-add]").forEach(btn => {
-    btn.addEventListener("click", () => addCustomExercise(btn.getAttribute("data-confirm-add")));
-  });
+  return ids.filter(id => defOf(id));
+}
+function daysContaining(id) {
+  const plan = settingsCache.dayPlan;
+  return BASE_ROUTINE.filter(d => plan ? (plan[d.id] || []).indexOf(id) >= 0
+                                       : (LIVE_DAYS.find(l => l.id === d.id) || { exercises: [] }).exercises.some(e => e.id === id));
+}
+function lastLine(id) {
+  const last = getLastEntry(id);
+  const def = defOf(id);
+  return last ? `Ultima: ${last.dateLabel}` : "Sin registros";
 }
 
-async function toggleExerciseActive(exId) {
-  if (!cache[exId]) cache[exId] = emptyDoc();
-  if (!cache[exId].meta) cache[exId].meta = {};
-  cache[exId].meta.active = cache[exId].meta.active === false ? true : false;
-  await persist(exId);
+function renderExerciseManagement() {
+  const container = document.getElementById("exerciseManagementList");
+  const lib = libraryIds();
+  const active = lib.filter(id => !isArchived(id)).sort((x, y) => displayName(x).localeCompare(displayName(y), "es"));
+  const archived = lib.filter(isArchived);
+
+  const libRows = active.map(id => {
+    const def = defOf(id);
+    const tags = daysContaining(id).map(d => `<span class="dtag ${d.badge}">${shortDay(d)}</span>`).join("")
+      || `<span class="dtag none">Sin dia</span>`;
+    return `<div class="lib-row" data-lib="${id}">
+      <span class="drag-handle" data-drag-lib="${id}" aria-label="Arrastrar">&#8801;</span>
+      <div class="lib-info"><div class="lib-name">${esc(displayName(id))}</div>
+        <div class="lib-meta">${esc(def.target)}${getLastEntry(id) ? " &middot; " + lastLine(id) : ""}</div></div>
+      <div class="day-tags">${tags}</div>
+    </div>`;
+  }).join("");
+
+  const dayCards = LIVE_DAYS.map(day => {
+    const open = !!exUi.days[day.id];
+    const rows = day.exercises.map((ex, i) => `
+      <div class="day-row" data-dayrow="${ex.id}">
+        <span class="drag-handle" data-drag-day="${day.id}|${ex.id}" aria-label="Arrastrar">&#8801;</span>
+        <span class="row-num">${i + 1}</span>
+        <div class="lib-info" data-open-ex="${ex.id}"><div class="lib-name">${esc(displayName(ex.id))}</div>
+          <div class="lib-meta">${esc(ex.target)}</div></div>
+        <button class="icon-btn remove" type="button" data-remove="${day.id}|${ex.id}" aria-label="Quitar">&minus;</button>
+      </div>`).join("");
+    return `<div class="xm-day${open ? " open" : ""}" data-drop-day="${day.id}">
+      <div class="xm-day-head ${day.badge}" data-toggle-day="${day.id}">
+        <span class="xm-day-emoji">${day.emoji}</span>
+        <div class="xm-day-info"><div class="xm-day-title">${plain(day.title)}</div>
+          <div class="xm-day-sub">${day.exercises.length} ejercicios${open ? "" : " &middot; " + esc(day.exercises.slice(0, 3).map(e => displayName(e.id)).join(", ")) + (day.exercises.length > 3 ? "..." : "")}</div></div>
+        <span class="xm-chev">&#8250;</span>
+      </div>
+      ${open ? `<div class="xm-day-body">${rows || `<div class="xm-empty">Arrastra aqui ejercicios o anadelos de la lista.</div>`}
+        <button class="xm-add" type="button" data-add-from-lib="${day.id}">+ Anadir de la lista</button></div>` : ""}
+    </div>`;
+  }).join("");
+
+  const archRows = archived.map(id => `<div class="lib-row archived">
+      <div class="lib-info"><div class="lib-name">${esc(displayName(id))}</div><div class="lib-meta">${lastLine(id)}</div></div>
+      <button class="ex-toggle-btn is-active" type="button" data-unarchive="${id}">Reactivar</button></div>`).join("");
+
+  container.innerHTML = `
+    <div class="xm-section${exUi.lib ? " open" : ""}">
+      <div class="xm-head" data-toggle-sec="lib">
+        <div class="xm-head-info"><div class="xm-title">Todos los ejercicios</div>
+          <div class="xm-sub">${active.length} ejercicios &middot; arrastra &#8801; a un dia</div></div>
+        <button class="pill primary small" type="button" data-new-ex>+ Nuevo</button>
+        <span class="xm-chev">&#8250;</span>
+      </div>
+      ${exUi.lib ? `<div class="xm-body">${libRows}</div>` : ""}
+    </div>
+    <div class="section-label">Tus dias</div>
+    ${dayCards}
+    ${archived.length ? `<div class="xm-section small${exUi.archived ? " open" : ""}">
+      <div class="xm-head" data-toggle-sec="archived">
+        <div class="xm-head-info"><div class="xm-title">Archivados</div><div class="xm-sub">${archived.length} &middot; su historial se conserva</div></div>
+        <span class="xm-chev">&#8250;</span>
+      </div>
+      ${exUi.archived ? `<div class="xm-body">${archRows}</div>` : ""}
+    </div>` : ""}`;
+
+  container.querySelectorAll("[data-toggle-sec]").forEach(el => el.addEventListener("click", e => {
+    if (e.target.closest("[data-new-ex]")) return;
+    const k = el.getAttribute("data-toggle-sec");
+    exUi[k] = !exUi[k];
+    renderExerciseManagement();
+  }));
+  container.querySelectorAll("[data-toggle-day]").forEach(el => el.addEventListener("click", () => {
+    const id = el.getAttribute("data-toggle-day");
+    exUi.days[id] = !exUi.days[id];
+    renderExerciseManagement();
+  }));
+  container.querySelector("[data-new-ex]").addEventListener("click", e => { e.stopPropagation(); openExerciseSheet(null); });
+  container.querySelectorAll(".lib-row[data-lib]").forEach(row => row.addEventListener("click", e => {
+    if (e.target.closest(".drag-handle")) return;
+    openExerciseSheet(row.getAttribute("data-lib"));
+  }));
+  container.querySelectorAll("[data-open-ex]").forEach(el => el.addEventListener("click", () => openExerciseSheet(el.getAttribute("data-open-ex"))));
+  container.querySelectorAll("[data-remove]").forEach(btn => btn.addEventListener("click", async () => {
+    const [dayId, exId] = btn.getAttribute("data-remove").split("|");
+    const plan = ensurePlan();
+    plan[dayId] = plan[dayId].filter(x => x !== exId);
+    await savePlan();
+    showToast("Quitado de " + shortDay(BASE_ROUTINE.find(d => d.id === dayId)));
+  }));
+  container.querySelectorAll("[data-add-from-lib]").forEach(btn => btn.addEventListener("click", () => openAddSheet(btn.getAttribute("data-add-from-lib"))));
+  container.querySelectorAll("[data-unarchive]").forEach(btn => btn.addEventListener("click", async () => {
+    const id = btn.getAttribute("data-unarchive");
+    cache[id].meta = Object.assign({}, cache[id].meta, { active: true });
+    await persist(id);
+    rebuildLiveRoutine();
+    renderExerciseManagement();
+    showToast("Reactivado. Anadelo a un dia cuando quieras");
+  }));
+  container.querySelectorAll("[data-drag-lib]").forEach(h => h.addEventListener("pointerdown", e =>
+    startDrag(e, { kind: "lib", id: h.getAttribute("data-drag-lib") })));
+  container.querySelectorAll("[data-drag-day]").forEach(h => h.addEventListener("pointerdown", e => {
+    const [dayId, id] = h.getAttribute("data-drag-day").split("|");
+    startDrag(e, { kind: "day", id, fromDay: dayId });
+  }));
+}
+
+async function savePlan() {
+  ensurePlan();
   rebuildLiveRoutine();
   renderExerciseManagement();
   refreshDayProgress();
+  const ok = await persistSettings();
+  if (!ok) showToast("No se guardo: revisa tu conexion");
 }
 
-async function addCustomExercise(dayId) {
-  const nameInput = document.getElementById(`addExName-${dayId}`);
-  const typeInput = document.getElementById(`addExType-${dayId}`);
-  const targetInput = document.getElementById(`addExTarget-${dayId}`);
-  const name = nameInput.value.trim();
-  const type = typeInput.value;
-  const target = targetInput.value.trim() || "3x10";
-  if (!name) { showToast("Ponle un nombre al ejercicio"); return; }
+// ---------- arrastrar ----------
+let drag = null;
+function startDrag(e, src) {
+  e.preventDefault();
+  const rowEl = e.target.closest(".lib-row, .day-row");
+  if (!rowEl) return;
+  const r = rowEl.getBoundingClientRect();
+  const ghost = rowEl.cloneNode(true);
+  ghost.classList.add("drag-ghost");
+  Object.assign(ghost.style, { width: r.width + "px", left: r.left + "px", top: r.top + "px" });
+  document.body.appendChild(ghost);
+  rowEl.classList.add("dragging-src");
+  document.body.classList.add("is-dragging");
+  drag = { src, ghost, rowEl, offY: e.clientY - r.top, x: e.clientX, y: e.clientY, target: null, index: Infinity };
+  if (navigator.vibrate) navigator.vibrate(12);
+  document.addEventListener("pointermove", onDragMove);
+  document.addEventListener("pointerup", onDragEnd);
+  document.addEventListener("pointercancel", onDragCancel);
+  requestAnimationFrame(autoScrollLoop);
+}
+function onDragMove(e) {
+  if (!drag) return;
+  drag.x = e.clientX; drag.y = e.clientY;
+  drag.ghost.style.top = (e.clientY - drag.offY) + "px";
+  updateDropTarget();
+}
+function clearDropMarks() {
+  document.querySelectorAll(".xm-day.drop-hover").forEach(d => d.classList.remove("drop-hover"));
+  document.querySelectorAll(".drop-line").forEach(l => l.remove());
+}
+function updateDropTarget() {
+  drag.ghost.style.visibility = "hidden";
+  const el = document.elementFromPoint(drag.x, drag.y);
+  drag.ghost.style.visibility = "";
+  clearDropMarks();
+  const dayEl = el && el.closest("[data-drop-day]");
+  if (!dayEl) { drag.target = null; return; }
+  drag.target = dayEl.getAttribute("data-drop-day");
+  dayEl.classList.add("drop-hover");
+  const body = dayEl.querySelector(".xm-day-body");
+  if (!body) { drag.index = Infinity; return; }
+  const rows = Array.from(body.querySelectorAll(".day-row:not(.dragging-src)"));
+  let index = rows.length;
+  for (let i = 0; i < rows.length; i++) {
+    const rr = rows[i].getBoundingClientRect();
+    if (drag.y < rr.top + rr.height / 2) { index = i; break; }
+  }
+  drag.index = index;
+  const line = document.createElement("div");
+  line.className = "drop-line";
+  if (rows[index]) rows[index].before(line);
+  else (rows.length ? rows[rows.length - 1].after(line) : body.prepend(line));
+}
+function autoScrollLoop() {
+  if (!drag) return;
+  const h = window.innerHeight;
+  const dy = drag.y < 100 ? -12 : drag.y > h - 80 ? 12 : 0;
+  if (dy) { window.scrollBy(0, dy); updateDropTarget(); }
+  requestAnimationFrame(autoScrollLoop);
+}
+function endDragCommon() {
+  document.removeEventListener("pointermove", onDragMove);
+  document.removeEventListener("pointerup", onDragEnd);
+  document.removeEventListener("pointercancel", onDragCancel);
+  clearDropMarks();
+  if (drag) { drag.ghost.remove(); drag.rowEl.classList.remove("dragging-src"); }
+  document.body.classList.remove("is-dragging");
+}
+function onDragCancel() { endDragCommon(); drag = null; }
+async function onDragEnd() {
+  const d = drag;
+  endDragCommon();
+  drag = null;
+  if (!d || !d.target) return;
+  const { src } = d;
+  const plan = ensurePlan();
+  const ids = plan[d.target].slice();
+  let idx = d.index;
+  const existing = ids.indexOf(src.id);
+  const sameDay = src.kind === "day" && src.fromDay === d.target;
+  if (existing >= 0) {
+    if (!sameDay && existing < idx) idx--;
+    ids.splice(existing, 1);
+  }
+  ids.splice(Math.min(idx, ids.length), 0, src.id);
+  plan[d.target] = ids;
+  if (src.kind === "day" && !sameDay) plan[src.fromDay] = plan[src.fromDay].filter(x => x !== src.id);
+  await savePlan();
+  const dayName = shortDay(BASE_ROUTINE.find(x => x.id === d.target));
+  if (!sameDay) showToast((existing >= 0 ? "Ya estaba en " : (src.kind === "day" ? "Movido a " : "Anadido a ")) + dayName);
+}
 
-  const id = "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  cache[id] = {
-    customName: name, notes: "", history: [], photos: [],
-    meta: { isCustom: true, dayId, target, type, active: true }
+// ---------- hojas inferiores ----------
+function openSheet(html) {
+  closeSheet(true);
+  const ov = document.createElement("div");
+  ov.className = "sheet-overlay";
+  ov.innerHTML = `<div class="sheet"><div class="sheet-grab"></div>${html}</div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add("open"));
+  ov.addEventListener("click", e => { if (e.target === ov) closeSheet(); });
+  return ov.querySelector(".sheet");
+}
+function closeSheet(instant) {
+  document.querySelectorAll(".sheet-overlay").forEach(ov => {
+    if (instant) { ov.remove(); return; }
+    ov.classList.remove("open");
+    setTimeout(() => ov.remove(), 220);
+  });
+}
+
+function openExerciseSheet(id) {
+  const isNew = !id;
+  const def = isNew ? { name: "", target: "3x10", type: "sets" } : defOf(id);
+  const inDays = isNew ? [] : daysContaining(id).map(d => d.id);
+  const sheet = openSheet(`
+    <div class="sheet-title">${isNew ? "Nuevo ejercicio" : esc(displayName(id))}</div>
+    <label class="sheet-label">Nombre</label>
+    <input class="sheet-input" id="shName" value="${isNew ? "" : esc(displayName(id))}" placeholder="ej: Press inclinado">
+    <div class="sheet-two">
+      <div><label class="sheet-label">Series x reps</label><input class="sheet-input" id="shTarget" value="${esc(def.target)}" placeholder="3x10"></div>
+      <div><label class="sheet-label">Tipo</label>${isNew
+        ? `<select class="sheet-input" id="shType">${Object.keys(TYPE_LABEL).map(k => `<option value="${k}">${TYPE_LABEL[k]}</option>`).join("")}</select>`
+        : `<div class="sheet-static">${TYPE_LABEL[def.type] || def.type}</div>`}</div>
+    </div>
+    <label class="sheet-label">En que dias</label>
+    <div class="day-chips">${BASE_ROUTINE.map(d => `<button type="button" class="day-chip ${d.badge}${inDays.indexOf(d.id) >= 0 ? " on" : ""}" data-chip="${d.id}">${d.emoji} ${plain(d.title)}</button>`).join("")}</div>
+    <button class="sheet-primary" type="button" id="shSave">${isNew ? "Crear ejercicio" : "Guardar"}</button>
+    ${isNew ? "" : `<button class="sheet-danger" type="button" id="shArchive">Archivar</button>`}
+  `);
+  sheet.querySelectorAll("[data-chip]").forEach(c => c.addEventListener("click", () => c.classList.toggle("on")));
+  sheet.querySelector("#shSave").addEventListener("click", async () => {
+    const name = sheet.querySelector("#shName").value.trim();
+    const target = sheet.querySelector("#shTarget").value.trim() || "3x10";
+    if (!name) { showToast("Ponle un nombre"); return; }
+    const chosen = Array.from(sheet.querySelectorAll(".day-chip.on")).map(c => c.getAttribute("data-chip"));
+    let exId = id;
+    if (isNew) {
+      exId = "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      cache[exId] = { customName: name, notes: "", history: [], photos: [],
+        meta: { isCustom: true, target, type: sheet.querySelector("#shType").value, active: true } };
+    } else {
+      const base = BASE_DEFS[exId];
+      cache[exId].customName = (base && name === base.name) ? "" : name;
+      cache[exId].meta = Object.assign({}, cache[exId].meta || {});
+      if (base && target === base.target) delete cache[exId].meta.target; else cache[exId].meta.target = target;
+    }
+    await persist(exId);
+    const plan = ensurePlan();
+    BASE_ROUTINE.forEach(d => {
+      const has = plan[d.id].indexOf(exId) >= 0;
+      if (chosen.indexOf(d.id) >= 0 && !has) plan[d.id].push(exId);
+      if (chosen.indexOf(d.id) < 0 && has) plan[d.id] = plan[d.id].filter(x => x !== exId);
+    });
+    closeSheet();
+    await savePlan();
+    showToast(isNew ? "Ejercicio creado" : "Guardado");
+  });
+  const arch = sheet.querySelector("#shArchive");
+  if (arch) arch.addEventListener("click", async () => {
+    cache[id].meta = Object.assign({}, cache[id].meta || {}, { active: false });
+    const plan = ensurePlan();
+    BASE_ROUTINE.forEach(d => { plan[d.id] = plan[d.id].filter(x => x !== id); });
+    await persist(id);
+    closeSheet();
+    await savePlan();
+    showToast("Archivado. Su historial se conserva");
+  });
+}
+
+function openAddSheet(dayId) {
+  const day = BASE_ROUTINE.find(d => d.id === dayId);
+  const render = () => {
+    const plan = ensurePlan();
+    return libraryIds().filter(id => !isArchived(id))
+      .sort((x, y) => displayName(x).localeCompare(displayName(y), "es"))
+      .map(id => {
+        const on = plan[dayId].indexOf(id) >= 0;
+        return `<button type="button" class="pick-row${on ? " on" : ""}" data-pick="${id}">
+          <span class="pick-check">${on ? "&#10003;" : "+"}</span>
+          <span class="lib-info"><span class="lib-name">${esc(displayName(id))}</span><span class="lib-meta">${esc(defOf(id).target)}</span></span>
+        </button>`;
+      }).join("");
   };
-  const ok = await persist(id);
-
-  if (!customExercisesByDay[dayId]) customExercisesByDay[dayId] = [];
-  customExercisesByDay[dayId].push({ id, name, target, type });
-  const parentDay = BASE_ROUTINE.find(d => d.id === dayId);
-  if (parentDay) STATIC_DAY_OF_EXERCISE[id] = parentDay;
-
-  nameInput.value = "";
-  targetInput.value = "3x10";
-  rebuildLiveRoutine();
-  renderExerciseManagement();
-  if (ok) showToast("Ejercicio anadido");
+  const sheet = openSheet(`
+    <div class="sheet-title">Anadir a ${plain(day.title)}</div>
+    <div class="sheet-hint">Toca para anadir o quitar. Se guarda al momento.</div>
+    <div class="pick-list" id="pickList">${render()}</div>
+    <button class="sheet-primary" type="button" id="pickDone">Listo</button>`);
+  const wire = () => sheet.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", async () => {
+    const id = b.getAttribute("data-pick");
+    const plan = ensurePlan();
+    if (plan[dayId].indexOf(id) >= 0) plan[dayId] = plan[dayId].filter(x => x !== id);
+    else plan[dayId].push(id);
+    const list = sheet.querySelector("#pickList");
+    const st = list.scrollTop;
+    list.innerHTML = render(); list.scrollTop = st; wire();
+    exUi.days[dayId] = true;
+    await savePlan();
+  }));
+  wire();
+  sheet.querySelector("#pickDone").addEventListener("click", () => closeSheet());
 }
 
 function renderExercises(day) {
@@ -1838,7 +2176,7 @@ function buildLogForm(exId) {
   const statusHtml = `<span class="save-status${existingEntry ? " saved" : ""}" id="status-${exId}">${existingEntry ? "&#10003; Guardado" : "Se guarda solo"}</span>`;
   const tab = panelTabByEx[exId] || "log";
 
-  const dayId = DAY_OF_EXERCISE[exId] ? DAY_OF_EXERCISE[exId].id : null;
+  const dayId = currentDayId || (DAY_OF_EXERCISE[exId] ? DAY_OF_EXERCISE[exId].id : null);
   const restSecs = (dayId && settingsCache.restByDay[dayId]) || 90;
   const restSettingHtml = (ex.type === "cardio" || ex.type === "activity") ? "" :
     `<div class="rest-setting">Descanso: <input type="number" id="rest-secs-${exId}" value="${restSecs}" data-day="${dayId}"> seg</div>`;
@@ -2138,7 +2476,7 @@ async function flushAutosave(exId) {
   const dateLabel = editing ? editing.dateLabel : labelFor(today);
   const h = cache[exId].history;
   const idx = h.findIndex(e => e.dateKey === dateKey);
-  if (sets.length > 0) upsertHistory(exId, dateKey, dateLabel, sets);
+  if (sets.length > 0) upsertHistory(exId, dateKey, dateLabel, sets, editing ? null : currentDayId);
   else if (idx >= 0) h.splice(idx, 1);
 
   setSaveStatus(exId, "saving");
