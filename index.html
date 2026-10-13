@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <!-- App en pantalla de inicio -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -895,6 +895,41 @@
   .mrow .bdelta { text-align: right; font-size: 12.5px; color: var(--text-secondary); }
   .body-lightbox { z-index: 120; }
   .blb-date { color: #fff; font-weight: 700; }
+
+  /* ================= Tacto de app nativa ================= */
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+  input, textarea, select, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  #app {
+    position: fixed; inset: 0; max-width: none; margin: 0; min-height: 0;
+    overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;
+    padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+  }
+  #app > * { max-width: 560px; margin-left: auto; margin-right: auto; }
+  #app > header.topbar { max-width: none; }
+  #app > header.topbar .topbar-row { max-width: 520px; margin: 0 auto; }
+  .tabbar { bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) - 6px)); }
+  .toast { bottom: calc(max(12px, calc(env(safe-area-inset-bottom, 0px) - 6px)) + 82px); }
+  .rest-bar { bottom: calc(max(12px, calc(env(safe-area-inset-bottom, 0px) - 6px)) + 76px); }
+  .finish-scroll, .sheet, .pick-list { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  /* inputs de 16px o mas: iOS no hace zoom al escribir */
+  input, textarea, select { font-size: max(16px, 1em); }
+  .rest-setting input { font-size: 16px; width: 54px; }
+  .mood-note, .notes-block textarea { font-size: 16px; }
+
+  /* sin efectos inmediatos al poner el dedo: solo con toque real */
+  @media (hover: none) {
+    .trip-card:active, .extra-tile:active, .btile:active, .finish-btn:active, .session-row:active, .history-row:active,
+    .day-card:active, .cal-day:active, .icon-btn.remove:active, .save-btn:active { transform: none; background: inherit; opacity: 1; }
+    .session-row:active, .history-row:active { background: transparent; }
+  }
+  .trip-card, .extra-tile, .btile, .exercise-head, .lib-row, .session-row, .pill, .tab-btn, .xm-day-head, .xm-head,
+  .finish-btn, .mood-face, .mood-tag, .day-chip, .pick-row, .hero-btn, .sheet-primary, .xm-add, .cal-day, .bphoto, .bcmp, .icon-btn, .rest-btn {
+    transition: transform 0.16s ease, opacity 0.16s ease, background-color 0.16s ease;
+  }
+  .is-pressed { transform: scale(0.97) !important; opacity: 0.82; }
+  .exercise-head.is-pressed, .lib-row.is-pressed, .session-row.is-pressed, .pick-row.is-pressed, .xm-head.is-pressed { transform: none !important; opacity: 1; background: var(--accent-soft); }
+  .tab-btn.is-pressed { transform: scale(0.92) !important; }
 </style>
 </head>
 <body>
@@ -1847,6 +1882,7 @@ const views = {
 };
 let currentViewKey = "view-home";
 const backBtn = document.getElementById("backBtn");
+const appScroller = document.getElementById("app");
 const topbar = document.getElementById("topbar");
 
 function showView(key) {
@@ -1863,7 +1899,7 @@ function showView(key) {
   document.querySelectorAll(".tab-btn").forEach(t => t.classList.toggle("active", t.id === tabFor[key]));
   if (key === "view-home") renderHome();
   if (key === "view-body") renderBody();
-  window.scrollTo(0, 0);
+  appScroller.scrollTo(0, 0);
 }
 backBtn.addEventListener("click", () => showView(currentViewKey === "view-detail" ? "view-cal" : "view-home"));
 document.getElementById("tabHome").addEventListener("click", () => showView("view-home"));
@@ -2167,7 +2203,7 @@ function autoScrollLoop() {
   if (!drag) return;
   const h = window.innerHeight;
   const dy = drag.y < 100 ? -12 : drag.y > h - 80 ? 12 : 0;
-  if (dy) { window.scrollBy(0, dy); updateDropTarget(); }
+  if (dy) { appScroller.scrollBy(0, dy); updateDropTarget(); }
   requestAnimationFrame(autoScrollLoop);
 }
 function endDragCommon() {
@@ -3097,8 +3133,8 @@ function showToast(msg) {
   toastTimer = setTimeout(() => toast.classList.remove("show"), 1600);
 }
 
-window.addEventListener("scroll", () => {
-  if (window.scrollY > 4) topbar.classList.add("scrolled");
+appScroller.addEventListener("scroll", () => {
+  if (appScroller.scrollTop > 4) topbar.classList.add("scrolled");
   else topbar.classList.remove("scrolled");
 });
 
@@ -3687,6 +3723,48 @@ function openBodySheet(id) {
 
 document.getElementById("tabBody").addEventListener("click", () => showView("view-body"));
 document.getElementById("bodyNewBtn").addEventListener("click", () => openBodySheet(null));
+
+// ---------- Tacto de app nativa ----------
+(function nativeTouch() {
+  // 1) Un toque solo cuenta si el dedo no se ha movido y la lista no estaba deslizandose
+  let lastScroll = 0, sx = 0, sy = 0, moved = false, startedWhileScrolling = false;
+  document.addEventListener("scroll", () => { lastScroll = performance.now(); }, { passive: true, capture: true });
+  document.addEventListener("touchstart", e => {
+    const t = e.touches[0]; sx = t.clientX; sy = t.clientY; moved = false;
+    startedWhileScrolling = performance.now() - lastScroll < 140;
+  }, { passive: true, capture: true });
+  document.addEventListener("touchmove", e => {
+    const t = e.touches[0];
+    if (Math.abs(t.clientX - sx) > 10 || Math.abs(t.clientY - sy) > 10) moved = true;
+  }, { passive: true, capture: true });
+  document.addEventListener("click", e => {
+    if (!e.isTrusted) return;
+    if ((moved || startedWhileScrolling) && !e.target.closest("input, textarea, select")) {
+      e.preventDefault(); e.stopPropagation();
+    }
+    moved = false; startedWhileScrolling = false;
+  }, true);
+
+  // 2) Efecto de "pulsado" solo cuando es un toque de verdad (con un pequeno retardo, como en iOS)
+  const PRESSABLE = ".trip-card, .extra-tile, .btile, .exercise-head, .lib-row[data-lib], .day-row .lib-info, .session-row, .pill, .tab-btn, " +
+    ".xm-day-head, .xm-head, .finish-btn, .mood-face, .mood-tag, .day-chip, .pick-row, .hero-btn, .sheet-primary, .xm-add, .copy-last-btn, " +
+    ".panel-tabs button, .metric-tabs button, .seg button, .cal-day, .bphoto, .bcmp, .icon-btn, .rest-btn, .session-timer, .day-timer.start";
+  let pressTimer = null, pressedEl = null;
+  const release = () => {
+    clearTimeout(pressTimer);
+    if (pressedEl) { const el = pressedEl; setTimeout(() => el.classList.remove("is-pressed"), 90); pressedEl = null; }
+  };
+  document.addEventListener("touchstart", e => {
+    release();
+    if (startedWhileScrolling) return;
+    const el = e.target.closest(PRESSABLE);
+    if (!el) return;
+    pressTimer = setTimeout(() => { if (!moved) { pressedEl = el; el.classList.add("is-pressed"); } }, 70);
+  }, { passive: true });
+  document.addEventListener("touchmove", () => { if (moved) release(); }, { passive: true });
+  document.addEventListener("touchend", release, { passive: true });
+  document.addEventListener("touchcancel", release, { passive: true });
+})();
 
 (function setupInstallCard() {
   const standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
