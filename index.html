@@ -970,6 +970,29 @@
   .wfield-in input:focus { outline: 2px solid var(--accent); }
   .wfield-in span { font-size: 12px; color: var(--text-secondary); font-weight: 700; width: 30px; }
   input.ocr-filled { background: var(--accent-soft) !important; box-shadow: inset 0 0 0 1.5px var(--accent); }
+
+  /* ================= v3: sin barra fija arriba, pantalla completa por altura real ================= */
+  :root { --app-h: 100dvh; --gap-bottom: 0px !important; }
+  html.is-standalone { --app-h: 100vh; }
+  html, body { height: var(--app-h) !important; }
+  #app { top: 0 !important; bottom: auto !important; height: var(--app-h); }
+  .sheet-overlay, .finish-overlay, .lightbox, #authScreen { top: 0 !important; bottom: auto !important; height: var(--app-h); }
+  .tabbar { top: var(--app-h); bottom: auto !important; transform: translateY(-100%); }
+  body.is-dragging .tabbar { transform: translateY(0); }
+  .toast { bottom: auto !important; top: calc(var(--app-h) - var(--tabbar-h) - env(safe-area-inset-bottom, 0px) - 66px); }
+  .rest-bar { bottom: auto !important; top: calc(var(--app-h) - var(--tabbar-h) - env(safe-area-inset-bottom, 0px) - 14px); transform: translateY(-100%); }
+  /* la cabecera ya no se queda pegada: se va con el contenido */
+  header.topbar { position: relative !important; }
+  /* solo un velo suave bajo la hora para que se lea al desplazar */
+  .status-scrim {
+    position: fixed; top: 0; left: 0; right: 0; height: calc(env(safe-area-inset-top, 0px) + 8px); z-index: 30; pointer-events: none;
+    background: linear-gradient(to bottom, rgba(5,8,25,0.55), rgba(5,8,25,0.25) 70%, rgba(5,8,25,0));
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .status-scrim.on { opacity: 1; }
+  /* cronometro: pastilla flotante solo durante el entreno */
+  .session-timer { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 50%; transform: translateX(-50%); z-index: 35;
+    background: var(--brand); border-color: rgba(255,255,255,0.3); box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
 </style>
 </head>
 <body>
@@ -1124,6 +1147,7 @@
   <button class="tab-btn" id="manageExercisesBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg>Ejercicios</button>
 </nav>
 
+<div class="status-scrim" id="statusScrim"></div>
 <div class="toast" id="toast">Guardado</div>
 
 <div class="rest-bar" id="restBar">
@@ -3203,6 +3227,7 @@ function showToast(msg) {
 }
 
 appScroller.addEventListener("scroll", () => {
+  const sc = document.getElementById("statusScrim"); if (sc) sc.classList.toggle("on", appScroller.scrollTop > 40);
   if (appScroller.scrollTop > 4) topbar.classList.add("scrolled");
   else topbar.classList.remove("scrolled");
 });
@@ -4044,17 +4069,6 @@ async function importWatchShots(exId, files) {
   const standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
   if (standalone) {
     document.documentElement.classList.add("is-standalone");
-    // iOS en modo app a pantalla completa calcula la altura sin la zona de la hora
-    // y deja un hueco abajo: lo medimos y estiramos la app hasta el borde
-    const fit = () => {
-      const portrait = window.innerHeight >= window.innerWidth;
-      const full = portrait ? Math.max(screen.height, screen.width) : Math.min(screen.height, screen.width);
-      const gap = Math.round(full - window.innerHeight);
-      document.documentElement.style.setProperty("--gap-bottom", (gap > 0 && gap < 120 ? gap : 0) + "px");
-    };
-    fit();
-    window.addEventListener("orientationchange", () => setTimeout(fit, 300));
-    window.addEventListener("resize", () => { if (!document.activeElement || !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) fit(); });
     return;
   }
   let dismissed = false;
