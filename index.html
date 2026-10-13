@@ -1340,6 +1340,13 @@ async function initDb() {
 async function startApp() {
   hideAuthScreen();
   await loadAll();
+  try {
+    const pending = JSON.parse(localStorage.getItem("pendingSettings") || "null");
+    if (pending && Array.isArray(pending.workouts)) {
+      settingsCache.workouts = mergeWorkouts(settingsCache.workouts, pending.workouts);
+      persistSettings();
+    }
+  } catch (e) {}
   try { updateSessionTimer(); } catch (e) {}
   renderCalendar();
   refreshAllSummaries();
@@ -1430,18 +1437,74 @@ async function persist(exId, quiet) {
   }
 }
 
-async function persistSettings() {
-  if (!supabaseClient || !currentUser) return false;
+// Une los entrenos finalizados de dos copias de los ajustes (local y servidor),
+// para que una pestana antigua nunca borre un entreno que se cerro en otra
+function mergeWorkouts(a, b) {
+  const byKey = {};
+  (a || []).concat(b || []).forEach(w => {
+    if (!w || !w.dayId || !w.dateKey) return;
+    const k = w.dayId + "|" + w.dateKey;
+    const cur = byKey[k];
+    const score = x => (x.end ? 1e15 : 0) + (x.updated || x.end || 0);
+    if (!cur || score(w) > score(cur)) byKey[k] = w;
+  });
+  return Object.values(byKey).sort((x, y) => x.dateKey.localeCompare(y.dateKey));
+}
+function savePendingLocal() {
+  try { localStorage.setItem("pendingSettings", JSON.stringify(settingsCache)); } catch (e) {}
+}
+function clearPendingLocal() {
+  try { localStorage.removeItem("pendingSettings"); } catch (e) {}
+}
+async function fetchRemoteSettings() {
+  const { data, error } = await supabaseClient.from("exercise_logs").select("meta").eq("exercise_id", "__settings__").maybeSingle();
+  if (error) throw error;
+  return (data && data.meta) || null;
+}
+let settingsChain = Promise.resolve(true);
+let settingsRetryTimer = null;
+function persistSettings() {
+  settingsChain = settingsChain.then(() => persistSettingsNow());
+  return settingsChain;
+}
+async function persistSettingsNow() {
+  if (!supabaseClient || !currentUser) { savePendingLocal(); return false; }
   try {
+    const remote = await fetchRemoteSettings();
+    if (remote && Array.isArray(remote.workouts)) settingsCache.workouts = mergeWorkouts(remote.workouts, settingsCache.workouts);
     const { error } = await supabaseClient.from("exercise_logs").upsert({
       exercise_id: "__settings__",
       user_id: currentUser.id,
+      custom_name: "", notes: "", history: [], photos: [],
       meta: settingsCache
     }, { onConflict: "exercise_id" });
-    if (error) { console.error("Error guardando ajustes:", error); return false; }
+    if (error) throw error;
+    clearPendingLocal();
+    clearTimeout(settingsRetryTimer);
     return true;
-  } catch (e) { console.error("Error guardando ajustes:", e); return false; }
+  } catch (e) {
+    console.error("Error guardando ajustes:", e);
+    savePendingLocal();
+    clearTimeout(settingsRetryTimer);
+    settingsRetryTimer = setTimeout(() => persistSettings(), 8000);
+    showToast("No se pudo guardar. Reintentando..." + (e && e.message ? " (" + e.message + ")" : ""));
+    return false;
+  }
 }
+// al volver a la app, traer lo ultimo del servidor (por si se cambio en otra pestana)
+async function syncSettingsFromServer() {
+  if (!supabaseClient || !currentUser) return;
+  try {
+    const remote = await fetchRemoteSettings();
+    if (!remote) return;
+    const merged = mergeWorkouts(settingsCache.workouts, remote.workouts);
+    const localActive = settingsCache.activeWorkout;
+    settingsCache = Object.assign({}, settingsCache, remote, { workouts: merged });
+    if (localActive && (!remote.activeWorkout || (localActive.start || 0) > (remote.activeWorkout.start || 0))) settingsCache.activeWorkout = localActive;
+    renderHome(); renderFinishButton(); updateSessionTimer();
+  } catch (e) { console.error(e); }
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") syncSettingsFromServer(); });
 
 const BASE_DEFS = {};
 const STATIC_DAY_OF_EXERCISE = {}; // never shrinks, unlike DAY_OF_EXERCISE — needed so
@@ -2810,6 +2873,9 @@ function copyLastSession(exId) {
 
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flushAllPending(); });
 window.addEventListener("pagehide", flushAllPending);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden" && moodSaveTimer) { clearTimeout(moodSaveTimer); moodSaveTimer = null; persistSettings(); }
+});
 
 // ---------- Progreso ----------
 function metricsFor(type) {
@@ -3195,7 +3261,7 @@ async function finishWorkout() {
     const st = workoutStats(dayId, todayKey);
     if (!st.prog.done) { showToast("Registra al menos una serie"); return; }
     const a = settingsCache.activeWorkout;
-    fin = { dayId, dateKey: todayKey, start: (a && a.dayId === dayId && a.dateKey === todayKey) ? a.start : null, end: Date.now(),
+    fin = { dayId, dateKey: todayKey, updated: Date.now(), start: (a && a.dayId === dayId && a.dateKey === todayKey) ? a.start : null, end: Date.now(),
             volume: Math.round(st.today.volume), sets: st.today.sets, reps: st.today.reps };
     workoutsList().push(fin);
     if (settingsCache.workouts.length > 400) settingsCache.workouts = settingsCache.workouts.slice(-400);
@@ -3346,6 +3412,7 @@ const MOOD_TAGS = [
 const PAIN_ZONES = ["Hombro", "Codo", "Muneca", "Cuello", "Espalda alta", "Espalda baja", "Cadera", "Rodilla", "Tobillo", "Otra"];
 let moodSaveTimer = null;
 function saveMoodSoon() { clearTimeout(moodSaveTimer); moodSaveTimer = setTimeout(() => persistSettings(), 700); }
+function touchWorkout(dayId, dateKey) { const r = finishedWorkout(dayId, dateKey); if (r) r.updated = Date.now(); }
 
 function renderMoodCard(dayId, dateKey) {
   const box = document.getElementById("moodCard");
@@ -3363,20 +3430,20 @@ function renderMoodCard(dayId, dateKey) {
   const saved = () => { const el = document.getElementById("moodSaved"); if (el) el.innerHTML = "&#10003; Guardado"; };
   box.querySelectorAll("[data-score]").forEach(b => b.addEventListener("click", () => {
     const v = parseInt(b.getAttribute("data-score"), 10);
-    m.score = m.score === v ? null : v; saveMoodSoon(); renderMoodCard(dayId, dateKey);
+    m.score = m.score === v ? null : v; touchWorkout(dayId, dateKey); saveMoodSoon(); renderMoodCard(dayId, dateKey);
   }));
   box.querySelectorAll("[data-tag]").forEach(b => b.addEventListener("click", () => {
     const k = b.getAttribute("data-tag"); const i = m.tags.indexOf(k);
     if (i >= 0) { m.tags.splice(i, 1); if (k === "dolor") m.pain = []; } else m.tags.push(k);
-    saveMoodSoon(); renderMoodCard(dayId, dateKey);
+    touchWorkout(dayId, dateKey); saveMoodSoon(); renderMoodCard(dayId, dateKey);
   }));
   box.querySelectorAll("[data-zone]").forEach(b => b.addEventListener("click", () => {
     const z = b.getAttribute("data-zone"); const i = m.pain.indexOf(z);
     if (i >= 0) m.pain.splice(i, 1); else m.pain.push(z);
-    saveMoodSoon(); renderMoodCard(dayId, dateKey);
+    touchWorkout(dayId, dateKey); saveMoodSoon(); renderMoodCard(dayId, dateKey);
   }));
   const note = document.getElementById("moodNote");
-  note.addEventListener("input", () => { m.note = note.value; saveMoodSoon(); saved(); });
+  note.addEventListener("input", () => { m.note = note.value; touchWorkout(dayId, dateKey); saveMoodSoon(); saved(); });
 }
 
 function moodSummaryHtml(rec) {
@@ -3416,7 +3483,7 @@ async function persistBody(entry) {
   if (!supabaseClient || !currentUser) return false;
   try {
     const { error } = await supabaseClient.from("exercise_logs").upsert({
-      exercise_id: "__body__" + entry.id, user_id: currentUser.id, meta: entry
+      exercise_id: "__body__" + entry.id, user_id: currentUser.id, custom_name: "", notes: "", history: [], photos: [], meta: entry
     }, { onConflict: "exercise_id" });
     if (error) { console.error(error); showToast("No se guardo: " + (error.message || "revisa Supabase")); return false; }
     return true;
