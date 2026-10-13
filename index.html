@@ -839,6 +839,62 @@
   .mood-sum-face small { font-size: 10.5px; font-weight: 700; color: var(--text-secondary); margin-top: 3px; }
   .mood-sum-body { flex: 1; min-width: 0; }
   .mood-sum-note { font-size: 13px; color: var(--text-secondary); margin-top: 6px; font-style: italic; }
+
+  /* ---- Cuerpo ---- */
+  .tabbar { grid-template-columns: repeat(4, 1fr); }
+  #view-body main { margin-top: 0; padding-top: 4px; }
+  #view-body .hero { padding-bottom: 30px; }
+  .hero-unit { font-size: 20px; font-weight: 700; opacity: 0.8; }
+  .hero-btn { margin-top: 16px; border: none; background: #fff; color: var(--brand); font: inherit; font-size: 15px; font-weight: 800; padding: 11px 18px; border-radius: 999px; cursor: pointer; }
+  .body-empty { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 22px; text-align: center; }
+  .body-empty-ico { font-size: 40px; }
+  .body-empty-title { font-size: 19px; font-weight: 800; margin-top: 6px; }
+  .body-empty-txt { font-size: 14px; color: var(--text-secondary); margin: 6px 0 16px 0; line-height: 1.45; }
+  .bgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btile { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 12px 14px; cursor: pointer; }
+  .btile:active { transform: scale(0.98); }
+  .btile-top { display: flex; justify-content: space-between; align-items: center; }
+  .btile .k { font-size: 12px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+  .btile .v { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .btile .v small { font-size: 13px; color: var(--text-secondary); font-weight: 700; }
+  .btile .s { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+  .bdelta { font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+  .bcompare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .bcmp, .bphoto { position: relative; border-radius: 16px; overflow: hidden; background: var(--card-3); cursor: pointer; }
+  .bcmp { aspect-ratio: 3 / 4; }
+  .bcmp img, .bphoto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bcmp span, .bphoto span { position: absolute; left: 8px; bottom: 8px; background: rgba(0,0,0,0.55); color: #fff; font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+  .bgallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .bphoto { aspect-ratio: 1; border-radius: 12px; }
+  .bphoto span { left: 5px; bottom: 5px; font-size: 10.5px; padding: 2px 6px; }
+  .body-list { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2px 12px; }
+  .body-list .session-row:first-child { border-top: none; }
+  .body-list .session-date { width: 56px; }
+  .photo-chip, .note-chip { background: var(--accent-soft); color: var(--accent); }
+  .bfields { background: var(--card-3); border-radius: 16px; overflow: hidden; }
+  .bfield { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--separator); }
+  .bfield:last-child { border-bottom: none; }
+  .bfield-lbl { flex: 1; min-width: 0; }
+  .bfield-lbl b { display: block; font-size: 15px; }
+  .bfield-lbl small { display: block; font-size: 11.5px; color: var(--text-secondary); line-height: 1.3; margin-top: 1px; }
+  .bfield-in { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .bfield-in input { width: 82px; border: none; background: var(--card); border-radius: 10px; padding: 10px; font: inherit; font-size: 17px; font-weight: 700; color: var(--text); text-align: right; }
+  .bfield-in input:focus { outline: 2px solid var(--accent); }
+  .bfield-in span { width: 22px; font-size: 13px; color: var(--text-secondary); font-weight: 700; }
+  .more-btn { width: 100%; margin-top: 8px; border: none; background: none; color: var(--accent); font: inherit; font-size: 13.5px; font-weight: 700; padding: 8px; cursor: pointer; }
+  #bExtra { margin-top: 8px; }
+  .bphotos-edit { display: flex; gap: 8px; flex-wrap: wrap; }
+  .bph, .bph-add { width: 76px; height: 100px; border-radius: 12px; overflow: hidden; position: relative; flex-shrink: 0; }
+  .bph img { width: 100%; height: 100%; object-fit: cover; }
+  .bph button { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; border: none; background: rgba(0,0,0,0.6); color: #fff; font-size: 14px; cursor: pointer; }
+  .bph-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: var(--accent-soft); color: var(--accent); font-size: 22px; cursor: pointer; border: 1.5px dashed var(--accent); }
+  .bph-add span { font-size: 12px; font-weight: 700; }
+  .mlist { background: var(--card-3); border-radius: 16px; overflow: hidden; }
+  .mrow { display: grid; grid-template-columns: 1fr auto 80px; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--separator); font-size: 14px; align-items: center; }
+  .mrow:last-child { border-bottom: none; }
+  .mrow .bdelta { text-align: right; font-size: 12.5px; color: var(--text-secondary); }
+  .body-lightbox { z-index: 120; }
+  .blb-date { color: #fff; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -928,6 +984,19 @@
     </main>
   </div>
 
+  <!-- CUERPO -->
+  <div class="view" id="view-body">
+    <section class="hero">
+      <div class="hero-kicker">Progresion visual</div>
+      <div class="hero-title" id="bodyHeroTitle">Tu cuerpo</div>
+      <div class="hero-sub" id="bodyHeroSub"></div>
+      <button class="hero-btn" type="button" id="bodyNewBtn">+ Nuevo registro</button>
+    </section>
+    <main>
+      <div id="bodyContent"></div>
+    </main>
+  </div>
+
   <!-- GESTION DE EJERCICIOS -->
   <div class="view" id="view-exercises">
     <section class="hero">
@@ -976,6 +1045,7 @@
 <nav class="tabbar" id="tabbar">
   <button class="tab-btn active" id="tabHome" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>Inicio</button>
   <button class="tab-btn" id="tabCal" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendario</button>
+  <button class="tab-btn" id="tabBody" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="2.2"/><path d="M5 9h14M12 9v5M9 21l3-7 3 7"/></svg>Cuerpo</button>
   <button class="tab-btn" id="manageExercisesBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg>Ejercicios</button>
 </nav>
 
@@ -1303,6 +1373,10 @@ async function loadAll() {
     settingsCache = Object.assign({ restByDay: { d1: 90, d2: 90, d3: 60, d4: 90 }, orderByDay: {} }, byId["__settings__"].meta);
   }
 
+  bodyEntries = Object.keys(byId).filter(id => id.indexOf("__body__") === 0)
+    .map(id => byId[id].meta).filter(m => m && m.id && !m.deleted)
+    .sort((a, b) => b.dateKey.localeCompare(a.dateKey) || (b.created || 0) - (a.created || 0));
+
   // known (base) exercises
   BASE_IDS.forEach(id => {
     const row = byId[id];
@@ -1312,7 +1386,7 @@ async function loadAll() {
   // anything else is a user-added custom exercise
   customExercisesByDay = {};
   Object.keys(byId).forEach(id => {
-    if (BASE_IDS.has(id) || id === "__settings__") return;
+    if (BASE_IDS.has(id) || id.indexOf("__") === 0) return;
     const row = byId[id];
     cache[id] = cacheFromRow(row);
     const meta = cache[id].meta || {};
@@ -1706,6 +1780,7 @@ const views = {
   detail: document.getElementById("view-detail"),
   exercises: document.getElementById("view-exercises"),
   cal: document.getElementById("view-cal"),
+  body: document.getElementById("view-body"),
 };
 let currentViewKey = "view-home";
 const backBtn = document.getElementById("backBtn");
@@ -1716,14 +1791,15 @@ function showView(key) {
   Object.values(views).forEach(v => v.classList.remove("active"));
   const map = {
     "view-home": views.home, "view-day": views.day,
-    "view-detail": views.detail, "view-exercises": views.exercises, "view-cal": views.cal
+    "view-detail": views.detail, "view-exercises": views.exercises, "view-cal": views.cal, "view-body": views.body
   };
   (map[key] || views.home).classList.add("active");
   currentViewKey = key;
   backBtn.classList.toggle("visible", key === "view-day" || key === "view-detail");
-  const tabFor = { "view-home": "tabHome", "view-day": "tabHome", "view-cal": "tabCal", "view-detail": "tabCal", "view-exercises": "manageExercisesBtn" };
+  const tabFor = { "view-home": "tabHome", "view-day": "tabHome", "view-cal": "tabCal", "view-detail": "tabCal", "view-exercises": "manageExercisesBtn", "view-body": "tabBody" };
   document.querySelectorAll(".tab-btn").forEach(t => t.classList.toggle("active", t.id === tabFor[key]));
   if (key === "view-home") renderHome();
+  if (key === "view-body") renderBody();
   window.scrollTo(0, 0);
 }
 backBtn.addEventListener("click", () => showView(currentViewKey === "view-detail" ? "view-cal" : "view-home"));
@@ -3311,6 +3387,239 @@ function moodSummaryHtml(rec) {
   return `<div class="mood-sum">${face ? `<div class="mood-sum-face">${face.e}<small>${face.l}</small></div>` : ""}
     <div class="mood-sum-body"><div class="mood-tags">${tags}</div>${m.note ? `<div class="mood-sum-note">${esc(m.note)}</div>` : ""}</div></div>`;
 }
+
+// ---------- Cuerpo: medidas, peso y fotos ----------
+let bodyEntries = [];
+const BODY_FIELDS = [
+  { k: "weight", l: "Peso", u: "kg", main: true, hint: "Por la manana, en ayunas, misma bascula" },
+  { k: "waist", l: "Cintura", u: "cm", main: true, hint: "A la altura del ombligo, soltando el aire, sin meter tripa" },
+  { k: "chest", l: "Pecho", u: "cm", main: true, hint: "Por la linea de los pezones, cinta plana y ajustada" },
+  { k: "arm", l: "Brazo", u: "cm", main: true, hint: "Parte mas gruesa del biceps, relajado. Siempre el mismo lado" },
+  { k: "hips", l: "Cadera", u: "cm", main: true, hint: "Parte mas ancha del gluteo, pies juntos" },
+  { k: "thigh", l: "Muslo", u: "cm", main: true, hint: "A mitad de muslo (unos 25 cm sobre la rodilla)" },
+  { k: "shoulders", l: "Hombros", u: "cm", hint: "Contorno por la parte mas ancha de los hombros" },
+  { k: "neck", l: "Cuello", u: "cm", hint: "Justo debajo de la nuez" },
+  { k: "forearm", l: "Antebrazo", u: "cm", hint: "Parte mas gruesa, brazo relajado" },
+  { k: "calf", l: "Gemelo", u: "cm", hint: "Parte mas gruesa, de pie y relajado" },
+  { k: "bodyfat", l: "% grasa", u: "%", hint: "Si tu bascula o un profesional te lo da" }
+];
+function bodySeries(k) {
+  return bodyEntries.filter(e => e.values && e.values[k] !== undefined && e.values[k] !== "")
+    .map(e => ({ dateKey: e.dateKey, dateLabel: e.dateLabel, v: numVal(e.values[k]) }))
+    .filter(x => !isNaN(x.v)).sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+}
+function signed(n, unit) {
+  const r = Math.round(n * 10) / 10;
+  return (r > 0 ? "+" : r < 0 ? "&minus;" : "") + fmtNum(Math.abs(r)) + " " + unit;
+}
+async function persistBody(entry) {
+  if (!supabaseClient || !currentUser) return false;
+  try {
+    const { error } = await supabaseClient.from("exercise_logs").upsert({
+      exercise_id: "__body__" + entry.id, user_id: currentUser.id, meta: entry
+    }, { onConflict: "exercise_id" });
+    if (error) { console.error(error); showToast("No se guardo: " + (error.message || "revisa Supabase")); return false; }
+    return true;
+  } catch (e) { showToast("No se guardo: revisa tu conexion"); return false; }
+}
+
+function sparkSvg(series, w, h) {
+  if (series.length < 2) return "";
+  const vs = series.map(x => x.v), min = Math.min(...vs), max = Math.max(...vs), span = (max - min) || 1;
+  const pts = series.map((x, i) => [3 + i * ((w - 6) / (series.length - 1)), h - 3 - ((x.v - min) / span) * (h - 6)]);
+  const d = pts.map((c, i) => (i ? "L" : "M") + c[0].toFixed(1) + " " + c[1].toFixed(1)).join(" ");
+  const l = pts[pts.length - 1];
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${l[0]}" cy="${l[1]}" r="2.5" fill="var(--accent)"/></svg>`;
+}
+function lineChartSvg(series, unit) {
+  const W = 340, H = 170, L = 38, R = 14, T = 22, B = 24;
+  const vs = series.map(x => x.v);
+  const { lo, hi, ticks } = niceTicks(Math.min(...vs), Math.max(...vs));
+  const x = i => L + i * ((W - L - R) / Math.max(1, series.length - 1));
+  const y = v => T + (1 - (v - lo) / ((hi - lo) || 1)) * (H - T - B);
+  const last = series.length - 1;
+  const grid = ticks.map(t => `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}" stroke="var(--separator)"/><text x="${L - 6}" y="${y(t) + 3.5}" text-anchor="end" font-size="10" fill="var(--text-secondary)">${fmtNum(t)}</text>`).join("");
+  const line = series.map((p, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(p.v).toFixed(1)).join(" ");
+  const dots = series.map((p, i) => `<circle cx="${x(i)}" cy="${y(p.v)}" r="${i === last ? 5 : 4}" fill="var(--accent)" stroke="var(--card-3)" stroke-width="2"/>`).join("");
+  const xl = [0, Math.floor(last / 2), last].filter((v, i, a) => a.indexOf(v) === i)
+    .map(i => `<text x="${x(i)}" y="${H - 6}" text-anchor="${i === 0 ? "start" : i === last ? "end" : "middle"}" font-size="10" fill="var(--text-secondary)">${series[i].dateLabel}</text>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img">${grid}<path d="${line} L${x(last)} ${H - B} L${L} ${H - B} Z" fill="var(--accent-soft)"/>
+    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${dots}
+    <text x="${x(last)}" y="${y(series[last].v) - 10}" text-anchor="end" font-size="11" font-weight="700" fill="var(--text)">${fmtNum(series[last].v)} ${unit}</text>${xl}</svg>`;
+}
+
+function allBodyPhotos() {
+  const out = [];
+  bodyEntries.forEach(e => (e.photos || []).forEach(ph => out.push({ entry: e, ph })));
+  return out.sort((a, b) => b.entry.dateKey.localeCompare(a.entry.dateKey));
+}
+
+function renderBody() {
+  const box = document.getElementById("bodyContent");
+  if (!box) return;
+  const wS = bodySeries("weight");
+  const lastE = bodyEntries[0];
+  document.getElementById("bodyHeroTitle").innerHTML = wS.length ? `${fmtNum(wS[wS.length - 1].v)} <small class="hero-unit">kg</small>` : "Tu cuerpo";
+  document.getElementById("bodyHeroSub").innerHTML = !lastE ? "Apunta tu peso, las medidas que quieras y una foto si te apetece. Nada es obligatorio."
+    : `Ultimo registro: <b>${lastE.dateLabel}</b>${wS.length > 1 ? " &middot; " + signed(wS[wS.length - 1].v - wS[0].v, "kg") + " desde " + wS[0].dateLabel : ""}`;
+
+  const tiles = BODY_FIELDS.map(f => {
+    const ser = bodySeries(f.k);
+    if (!ser.length) return "";
+    const lastV = ser[ser.length - 1], firstV = ser[0];
+    const diff = lastV.v - firstV.v;
+    return `<div class="btile" data-metric="${f.k}">
+      <div class="btile-top"><span class="k">${f.l}</span>${sparkSvg(ser.slice(-8), 56, 20)}</div>
+      <div class="v">${fmtNum(lastV.v)}<small> ${f.u}</small></div>
+      <div class="s">${ser.length > 1 ? `<span class="bdelta">${diff > 0 ? "&#9650;" : diff < 0 ? "&#9660;" : "="} ${signed(diff, f.u)}</span> desde ${firstV.dateLabel}` : lastV.dateLabel}</div>
+    </div>`;
+  }).join("");
+
+  const photos = allBodyPhotos();
+  const compare = photos.length >= 2 ? (() => {
+    const a = photos[photos.length - 1], b = photos[0];
+    return `<div class="bcompare">
+      <div class="bcmp" data-photo="${a.entry.id}|${a.ph.id}"><img src="${a.ph.dataUrl}" alt=""><span>Antes &middot; ${a.entry.dateLabel}</span></div>
+      <div class="bcmp" data-photo="${b.entry.id}|${b.ph.id}"><img src="${b.ph.dataUrl}" alt=""><span>Ahora &middot; ${b.entry.dateLabel}</span></div></div>`;
+  })() : "";
+  const gallery = photos.map(x => `<div class="bphoto" data-photo="${x.entry.id}|${x.ph.id}"><img src="${x.ph.dataUrl}" alt=""><span>${x.entry.dateLabel}</span></div>`).join("");
+
+  const entriesHtml = bodyEntries.map(e => {
+    const chips = BODY_FIELDS.filter(f => e.values && e.values[f.k] !== undefined && e.values[f.k] !== "")
+      .map(f => `<span class="chip">${f.l} ${String(e.values[f.k]).replace(".", ",")}${f.u === "%" ? "%" : " " + f.u}</span>`).join("");
+    const n = (e.photos || []).length;
+    return `<div class="session-row" data-edit-body="${e.id}">
+      <div class="session-date">${e.dateLabel}</div>
+      <div class="session-chips">${chips}${n ? `<span class="chip photo-chip">&#128247; ${n}</span>` : ""}${e.note ? `<span class="chip note-chip">&#128221;</span>` : ""}</div>
+    </div>`;
+  }).join("");
+
+  box.innerHTML = !bodyEntries.length ? `
+    <div class="body-empty">
+      <div class="body-empty-ico">&#128207;</div>
+      <div class="body-empty-title">Empieza cuando quieras</div>
+      <div class="body-empty-txt">Puedes apuntar solo el peso, solo el brazo o todo junto. La foto es opcional. Lo importante es repetirlo de vez en cuando, en condiciones parecidas.</div>
+      <button class="pill primary" type="button" id="bodyEmptyBtn">+ Primer registro</button>
+    </div>` : `
+    <div class="section-label">Medidas</div>
+    <div class="bgrid">${tiles}</div>
+    ${photos.length ? `<div class="section-label">Fotos</div>${compare}<div class="bgallery">${gallery}</div>` : ""}
+    <div class="section-label">Registros</div>
+    <div class="body-list">${entriesHtml}</div>`;
+
+  const nb = document.getElementById("bodyEmptyBtn"); if (nb) nb.addEventListener("click", () => openBodySheet(null));
+  box.querySelectorAll("[data-metric]").forEach(t => t.addEventListener("click", () => openMetricSheet(t.getAttribute("data-metric"))));
+  box.querySelectorAll("[data-photo]").forEach(t => t.addEventListener("click", () => {
+    const [eid, pid] = t.getAttribute("data-photo").split("|");
+    openBodyPhoto(eid, pid);
+  }));
+  box.querySelectorAll("[data-edit-body]").forEach(r => r.addEventListener("click", () => openBodySheet(r.getAttribute("data-edit-body"))));
+}
+
+function openMetricSheet(k) {
+  const f = BODY_FIELDS.find(x => x.k === k);
+  const ser = bodySeries(k);
+  const rows = ser.slice().reverse().map((x, i, arr) => {
+    const prev = arr[i + 1];
+    return `<div class="mrow"><span>${x.dateLabel}</span><b>${fmtNum(x.v)} ${f.u}</b><span class="bdelta">${prev ? signed(x.v - prev.v, f.u) : ""}</span></div>`;
+  }).join("");
+  openSheet(`
+    <div class="sheet-title">${f.l}</div>
+    <div class="sheet-hint">${f.hint}</div>
+    ${ser.length > 1 ? `<div class="chart-wrap">${lineChartSvg(ser.slice(-20), f.u)}</div>` : `<div class="chart-wrap"><div class="chart-empty">Con un registro mas veras la grafica.</div></div>`}
+    <div class="mlist">${rows}</div>
+    <button class="sheet-primary" type="button" onclick="closeSheet()">Cerrar</button>`);
+}
+
+function openBodyPhoto(eid, pid) {
+  const e = bodyEntries.find(x => x.id === eid);
+  const ph = e && (e.photos || []).find(x => x.id === pid);
+  if (!ph) return;
+  const ov = document.createElement("div");
+  ov.className = "lightbox open body-lightbox";
+  ov.innerHTML = `<button class="lightbox-close" type="button">&times;</button><img src="${ph.dataUrl}" alt=""><div class="blb-date">${e.dateLabel}</div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener("click", ev => { if (ev.target === ov || ev.target.classList.contains("lightbox-close")) ov.remove(); });
+}
+
+function openBodySheet(id) {
+  const existing = id ? bodyEntries.find(e => e.id === id) : null;
+  const draft = existing ? JSON.parse(JSON.stringify(existing)) : { values: {}, photos: [], note: "" };
+  const todayKey = dateKeyFor(new Date());
+  const lastOf = k => { const ser = bodySeries(k); return ser.length ? ser[ser.length - 1].v : null; };
+  const field = f => `<div class="bfield${f.main ? "" : " extra"}">
+      <div class="bfield-lbl"><b>${f.l}</b><small>${f.hint}</small></div>
+      <div class="bfield-in"><input type="number" inputmode="decimal" step="0.1" data-bf="${f.k}" value="${draft.values[f.k] !== undefined ? draft.values[f.k] : ""}" placeholder="${lastOf(f.k) !== null ? fmtNum(lastOf(f.k)) : "&mdash;"}"><span>${f.u}</span></div>
+    </div>`;
+  const sheet = openSheet(`
+    <div class="sheet-title">${existing ? "Editar registro" : "Nuevo registro"}</div>
+    <div class="sheet-hint">Rellena solo lo que te apetezca. En gris, tu ultimo valor.</div>
+    <label class="sheet-label">Fecha</label>
+    <input class="sheet-input" type="date" id="bDate" value="${existing ? existing.dateKey : todayKey}" max="${todayKey}">
+    <label class="sheet-label">Peso y medidas principales</label>
+    <div class="bfields">${BODY_FIELDS.filter(f => f.main).map(field).join("")}</div>
+    <button class="more-btn" type="button" id="bMore">+ Mas medidas (hombros, cuello, antebrazo, gemelo, % grasa)</button>
+    <div class="bfields" id="bExtra" style="display:none;">${BODY_FIELDS.filter(f => !f.main).map(field).join("")}</div>
+    <label class="sheet-label">Fotos (opcional)</label>
+    <div class="bphotos-edit" id="bPhotos"></div>
+    <label class="sheet-label">Nota (opcional)</label>
+    <textarea class="sheet-input" id="bNote" rows="2" placeholder="ej: despues de vacaciones, mucha retencion...">${esc(draft.note || "")}</textarea>
+    <button class="sheet-primary" type="button" id="bSave">Guardar</button>
+    ${existing ? `<button class="sheet-danger" type="button" id="bDelete">Borrar registro</button>` : ""}`);
+  const extraHas = BODY_FIELDS.some(f => !f.main && draft.values[f.k] !== undefined);
+  const extra = sheet.querySelector("#bExtra"), more = sheet.querySelector("#bMore");
+  if (extraHas) { extra.style.display = ""; more.style.display = "none"; }
+  more.addEventListener("click", () => { extra.style.display = ""; more.style.display = "none"; });
+
+  const renderPhotos = () => {
+    const box = sheet.querySelector("#bPhotos");
+    box.innerHTML = draft.photos.map(ph => `<div class="bph"><img src="${ph.dataUrl}" alt=""><button type="button" data-rm="${ph.id}">&times;</button></div>`).join("") +
+      (draft.photos.length < 4 ? `<label class="bph-add">&#128247;<span>Anadir</span><input type="file" accept="image/*" style="display:none;" id="bPhotoIn"></label>` : "");
+    box.querySelectorAll("[data-rm]").forEach(b => b.addEventListener("click", () => { draft.photos = draft.photos.filter(x => x.id !== b.getAttribute("data-rm")); renderPhotos(); }));
+    const inp = box.querySelector("#bPhotoIn");
+    if (inp) inp.addEventListener("change", async ev => {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+      try {
+        const dataUrl = await resizeImage(file, 900, 0.7);
+        draft.photos.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), dataUrl });
+        renderPhotos();
+      } catch (e) { showToast("No se pudo anadir la foto"); }
+    });
+  };
+  renderPhotos();
+
+  sheet.querySelector("#bSave").addEventListener("click", async () => {
+    const values = {};
+    sheet.querySelectorAll("[data-bf]").forEach(inp => { if (inp.value !== "") values[inp.getAttribute("data-bf")] = inp.value; });
+    const note = sheet.querySelector("#bNote").value.trim();
+    if (!Object.keys(values).length && !draft.photos.length && !note) { showToast("Apunta al menos una medida o una foto"); return; }
+    const dk = sheet.querySelector("#bDate").value || todayKey;
+    const entry = Object.assign(existing || { id: "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), created: Date.now() }, {
+      dateKey: dk, dateLabel: labelFor(new Date(dk + "T00:00:00")), values, photos: draft.photos, note
+    });
+    const btn = sheet.querySelector("#bSave"); btn.disabled = true; btn.textContent = "Guardando...";
+    const ok = await persistBody(entry);
+    btn.disabled = false; btn.textContent = "Guardar";
+    if (!ok) return;
+    if (!existing) bodyEntries.push(entry);
+    bodyEntries.sort((a, b) => b.dateKey.localeCompare(a.dateKey) || (b.created || 0) - (a.created || 0));
+    closeSheet();
+    renderBody();
+    showToast(existing ? "Registro actualizado" : "Registro guardado");
+  });
+  const del = sheet.querySelector("#bDelete");
+  if (del) del.addEventListener("click", async () => {
+    if (!confirm("Borrar este registro y sus fotos?")) return;
+    const ok = await persistBody({ id: existing.id, deleted: true });
+    if (!ok) return;
+    bodyEntries = bodyEntries.filter(e => e.id !== existing.id);
+    closeSheet(); renderBody(); showToast("Registro borrado");
+  });
+}
+
+document.getElementById("tabBody").addEventListener("click", () => showView("view-body"));
+document.getElementById("bodyNewBtn").addEventListener("click", () => openBodySheet(null));
 
 (function setupInstallCard() {
   const standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
