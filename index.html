@@ -930,6 +930,27 @@
   .is-pressed { transform: scale(0.97) !important; opacity: 0.82; }
   .exercise-head.is-pressed, .lib-row.is-pressed, .session-row.is-pressed, .pick-row.is-pressed, .xm-head.is-pressed { transform: none !important; opacity: 1; background: var(--accent-soft); }
   .tab-btn.is-pressed { transform: scale(0.92) !important; }
+
+  /* ================= Pantalla completa + barra inferior nativa ================= */
+  :root { --gap-bottom: 0px; --tabbar-h: 58px; }
+  html, body { height: calc(100% + var(--gap-bottom)); background: var(--bg); }
+  #app, .sheet-overlay, .finish-overlay, .lightbox, #authScreen { bottom: calc(-1 * var(--gap-bottom)) !important; }
+  #app { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 24px); }
+  .tabbar {
+    left: 0; right: 0; bottom: calc(-1 * var(--gap-bottom)); max-width: none; margin: 0;
+    border-radius: 0; border: none; border-top: 1px solid var(--separator);
+    background: var(--card); backdrop-filter: none; -webkit-backdrop-filter: none;
+    box-shadow: 0 -6px 24px rgba(14,19,48,0.06);
+    padding: 6px max(10px, calc((100vw - 560px) / 2)) calc(4px + env(safe-area-inset-bottom, 0px));
+    gap: 0;
+  }
+  .tab-btn { border-radius: 0; background: none !important; padding: 4px 0 2px 0; gap: 3px; font-size: 10.5px; }
+  .tab-btn svg { width: 46px; height: 28px; padding: 3px 12px; border-radius: 999px; box-sizing: border-box; transition: background-color 0.18s; }
+  .tab-btn.active svg { background: var(--accent-soft); }
+  .tab-btn.active { color: var(--accent); }
+  .toast { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 16px - var(--gap-bottom)); }
+  .rest-bar { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 12px - var(--gap-bottom)); }
+  .sheet { padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
 </style>
 </head>
 <body>
@@ -3768,7 +3789,21 @@ document.getElementById("bodyNewBtn").addEventListener("click", () => openBodySh
 
 (function setupInstallCard() {
   const standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
-  if (standalone) { document.documentElement.classList.add("is-standalone"); return; }
+  if (standalone) {
+    document.documentElement.classList.add("is-standalone");
+    // iOS en modo app a pantalla completa calcula la altura sin la zona de la hora
+    // y deja un hueco abajo: lo medimos y estiramos la app hasta el borde
+    const fit = () => {
+      const portrait = window.innerHeight >= window.innerWidth;
+      const full = portrait ? Math.max(screen.height, screen.width) : Math.min(screen.height, screen.width);
+      const gap = Math.round(full - window.innerHeight);
+      document.documentElement.style.setProperty("--gap-bottom", (gap > 0 && gap < 120 ? gap : 0) + "px");
+    };
+    fit();
+    window.addEventListener("orientationchange", () => setTimeout(fit, 300));
+    window.addEventListener("resize", () => { if (!document.activeElement || !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) fit(); });
+    return;
+  }
   let dismissed = false;
   try { dismissed = localStorage.getItem("installCardDismissed") === "1"; } catch (e) {}
   const card = document.getElementById("installCard");
