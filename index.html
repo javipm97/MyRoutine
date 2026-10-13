@@ -137,10 +137,10 @@
     background: transparent; color: var(--text); padding: 0 0 2px 0; width: 100%;
   }
   .exercise-target { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
-  .exercise-last { font-size: 13px; color: var(--accent); font-weight: 500; white-space: nowrap; margin-left: 6px; text-align: right; }
+  .exercise-last { font-size: 15px; font-weight: 700 !important; color: var(--accent); font-weight: 500; white-space: nowrap; margin-left: 6px; text-align: right; }
 
   .exercise-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-  .exercise-body.open { max-height: 900px; }
+  .exercise-body.open { max-height: 4000px; }
 
   .log-form { padding: 0 16px 16px 16px; border-top: 1px solid var(--separator); padding-top: 14px; }
   .today-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
@@ -321,6 +321,80 @@
   }
   .auth-error { color: #FF3B30; font-size: 13px; text-align: center; margin-top: 10px; min-height: 16px; }
   .auth-msg { color: var(--green); font-size: 13px; text-align: center; margin-top: 10px; min-height: 16px; }
+
+  /* ---- Autosave + progreso ---- */
+  .panel-tabs { display: flex; background: var(--card-3); border-radius: 10px; padding: 2px; margin-bottom: 14px; }
+  .panel-tabs button {
+    flex: 1; border: none; background: none; color: var(--text); font: inherit; font-size: 13.5px; font-weight: 600;
+    padding: 7px 0; border-radius: 8px; cursor: pointer;
+  }
+  .panel-tabs button.active { background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,0.12); color: var(--accent); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .form-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .save-status {
+    font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+    background: var(--card-3); color: var(--text-secondary); transition: background 0.2s, color 0.2s;
+  }
+  .save-status.saved { background: var(--green-soft); color: var(--text); }
+  .save-status.saving, .save-status.pending { background: var(--accent-soft); color: var(--text); }
+  .save-status.error { background: rgba(255,59,48,0.14); color: var(--text); }
+
+  .last-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+  .last-chips .lbl { font-size: 12px; color: var(--text-secondary); margin-right: 2px; }
+  .chip {
+    font-size: 12.5px; font-weight: 600; padding: 4px 9px; border-radius: 8px;
+    background: var(--card-3); color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .chip.top { background: var(--accent); color: #fff; }
+  .copy-last-btn {
+    border: none; background: var(--accent-soft); color: var(--accent); font: inherit; font-size: 12.5px; font-weight: 600;
+    padding: 4px 10px; border-radius: 8px; cursor: pointer;
+  }
+
+  .set-row .set-label { display: flex; align-items: center; gap: 5px; }
+  .set-dot {
+    width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--separator);
+    display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; flex-shrink: 0;
+  }
+  .set-row.done .set-dot { background: var(--green); border-color: var(--green); }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat-tile { background: var(--card-3); border-radius: 12px; padding: 10px 12px; }
+  .stat-tile .k { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.02em; }
+  .stat-tile .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; color: var(--text); }
+  .stat-tile .v small { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-left: 2px; }
+  .stat-tile .s { font-size: 11.5px; color: var(--text-secondary); margin-top: 1px; }
+  .trend-up { color: var(--green); font-weight: 700; }
+  .trend-down { color: #FF3B30; font-weight: 700; }
+
+  .metric-tabs { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .metric-tabs button {
+    border: 1px solid var(--separator); background: none; color: var(--text); font: inherit; font-size: 12.5px; font-weight: 600;
+    padding: 5px 11px; border-radius: 999px; cursor: pointer;
+  }
+  .metric-tabs button.active { background: var(--text); color: var(--card); border-color: var(--text); }
+
+  .chart-wrap { position: relative; background: var(--card-3); border-radius: 14px; padding: 8px 6px 4px 6px; margin-bottom: 14px; touch-action: pan-y; }
+  .chart-wrap svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .chart-empty { font-size: 13px; color: var(--text-secondary); padding: 26px 10px; text-align: center; }
+  .chart-tip {
+    position: absolute; top: 6px; pointer-events: none; background: var(--card); color: var(--text);
+    border-radius: 10px; padding: 6px 9px; font-size: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+    white-space: nowrap; display: none; transform: translateX(-50%); z-index: 2;
+  }
+  .chart-tip b { font-variant-numeric: tabular-nums; }
+
+  .section-title { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.02em; margin: 4px 0 6px 0; }
+  .session-row { display: flex; gap: 10px; align-items: flex-start; padding: 9px 4px; border-top: 1px solid var(--separator); cursor: pointer; border-radius: 8px; }
+  .session-row:active { background: var(--accent-soft); }
+  .session-date { font-size: 12.5px; font-weight: 600; width: 50px; flex-shrink: 0; padding-top: 4px; color: var(--text); }
+  .session-chips { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
+  .pr-badge { font-size: 10.5px; font-weight: 700; padding: 3px 7px; border-radius: 6px; background: var(--orange); color: #fff; align-self: center; }
+
+  .head-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+  .spark { display: block; }
 </style>
 </head>
 <body>
@@ -770,7 +844,7 @@ async function loadAll() {
   rebuildLiveRoutine();
 }
 
-async function persist(exId) {
+async function persist(exId, quiet) {
   if (!supabaseClient || !currentUser) return false;
   try {
     const { error } = await supabaseClient.from("exercise_logs").upsert({
@@ -784,13 +858,13 @@ async function persist(exId) {
     }, { onConflict: "exercise_id" });
     if (error) {
       console.error("Error guardando:", error);
-      showToast("No se guardo: " + (error.message || "revisa Supabase"));
+      if (!quiet) showToast("No se guardo: " + (error.message || "revisa Supabase"));
       return false;
     }
     return true;
   } catch (e) {
     console.error("Error guardando:", e);
-    showToast("No se guardo: revisa tu conexion");
+    if (!quiet) showToast("No se guardo: revisa tu conexion");
     return false;
   }
 }
@@ -854,7 +928,7 @@ function upsertHistory(exId, dateKey, dateLabel, sets) {
   const entry = { dateKey, dateLabel, sets };
   if (idx >= 0) h[idx] = entry; else h.unshift(entry);
   h.sort((a, b) => b.dateKey.localeCompare(a.dateKey));
-  cache[exId].history = h.slice(0, 20);
+  cache[exId].history = h.slice(0, 400);
 }
 
 // ---------- Calendar ----------
@@ -1018,6 +1092,7 @@ const backBtn = document.getElementById("backBtn");
 const topbar = document.getElementById("topbar");
 
 function showView(key) {
+  flushAllPending();
   Object.values(views).forEach(v => v.classList.remove("active"));
   const map = {
     "view-home": views.home, "view-day": views.day,
@@ -1061,6 +1136,7 @@ function liveSubFor(day) {
 }
 
 function openDay(dayId) {
+  flushAllPending();
   const day = LIVE_DAYS.concat(EXTRA_DAYS).find(d => d.id === dayId);
   if (!day) return;
   document.getElementById("dayTitle").textContent = day.title.replace(/&middot;/, "\u00b7");
@@ -1239,7 +1315,10 @@ function renderExercises(day) {
           </div>
           <div class="exercise-target">${ex.target}</div>
         </div>
-        <div class="exercise-last" id="last-${ex.id}">&mdash;</div>
+        <div class="head-right">
+          <div class="exercise-last" id="last-${ex.id}">&mdash;</div>
+          <svg class="spark" id="spark-${ex.id}" width="64" height="20" viewBox="0 0 64 20" aria-hidden="true"></svg>
+        </div>
       </div>
       <div class="exercise-body" id="body-${ex.id}"></div>
     `;
@@ -1264,10 +1343,17 @@ function refreshSummary(exId) {
   if (!lastEl) return;
   const last = getLastEntry(exId);
   if (last) {
-    lastEl.textContent = formatSetsSummary(EXERCISE_INDEX[exId].type, last.sets);
+    const type = EXERCISE_INDEX[exId].type;
+    if (type === "sets" || type === "carry") {
+      const top = metricsFor(type)[0].fn(last.sets);
+      lastEl.textContent = isNaN(top) ? formatSetsSummary(type, last.sets) : fmtNum(top) + " kg";
+    } else {
+      lastEl.textContent = formatSetsSummary(type, last.sets);
+    }
   } else {
     lastEl.textContent = "Sin datos";
   }
+  renderSpark(exId);
 }
 function refreshAllSummaries() {
   Object.keys(EXERCISE_INDEX).forEach(refreshSummary);
@@ -1302,6 +1388,7 @@ let openExId = null;
 let editingDateByEx = {}; // exId -> {dateKey, dateLabel} while editing a past entry, else unset (= today)
 
 function toggleExercise(exId) {
+  flushAllPending();
   const body = document.getElementById(`body-${exId}`);
   const isOpen = body.classList.contains("open");
   document.querySelectorAll(".exercise-body.open").forEach(b => { b.classList.remove("open"); b.innerHTML = ""; });
@@ -1340,10 +1427,11 @@ function buildLogForm(exId) {
   const editing = editingDateByEx[exId];
   const activeKey = editing ? editing.dateKey : todayKey;
 
-  const last = getLastEntry(exId);
+  const last = (cache[exId].history || []).find(e => e.dateKey !== activeKey) || null;
   const lastRef = last
-    ? `Ultima vez (${last.dateLabel}): ${formatSetsSummary(ex.type, last.sets)}`
-    : "Sin registros previos";
+    ? `<div class="last-chips"><span class="lbl">Ultima vez &middot; ${last.dateLabel}</span>${setChipsHtml(ex.type, last.sets)}
+        ${(ex.type === "sets" || ex.type === "carry") ? `<button class="copy-last-btn" type="button" data-copy-last="${exId}">Repetir</button>` : ""}</div>`
+    : `<div class="last-chips"><span class="lbl">Primera vez con este ejercicio</span></div>`;
 
   const existingEntry = (cache[exId].history || []).find(e => e.dateKey === activeKey);
   const count = ex.type === "cardio" ? 1 : parseSetCount(ex.target, ex.type);
@@ -1351,6 +1439,8 @@ function buildLogForm(exId) {
   let rows = "";
   for (let i = 0; i < count; i++) {
     const prev = existingEntry && existingEntry.sets[i];
+    const ls = (last && last.sets[i]) || (last && last.sets[last.sets.length - 1]) || null;
+    const done = prev && (ex.type === "carry" ? (prev.weight && prev.distance) : (prev.weight && prev.reps));
     if (ex.type === "cardio") {
       rows += `
         <div class="set-row">
@@ -1374,26 +1464,28 @@ function buildLogForm(exId) {
         </div>`;
     } else if (ex.type === "carry") {
       rows += `
-        <div class="set-row">
-          <span class="set-label">Serie ${i + 1}</span>
-          <div class="field"><input type="number" inputmode="decimal" id="f0-${exId}-${i}" value="${prev ? prev.weight || "" : ""}" placeholder="Kg"></div>
-          <div class="field"><input type="number" inputmode="decimal" id="f1-${exId}-${i}" value="${prev ? prev.distance || "" : ""}" placeholder="Metros"></div>
+        <div class="set-row${done ? " done" : ""}" data-setrow="${i}">
+          <span class="set-label"><span class="set-dot">&#10003;</span>${i + 1}</span>
+          <div class="field"><input type="number" inputmode="decimal" id="f0-${exId}-${i}" value="${prev ? prev.weight || "" : ""}" placeholder="${ls && ls.weight ? ls.weight + " kg" : "Kg"}"></div>
+          <div class="field"><input type="number" inputmode="decimal" id="f1-${exId}-${i}" value="${prev ? prev.distance || "" : ""}" placeholder="${ls && ls.distance ? ls.distance + " m" : "Metros"}"></div>
           <button class="rest-btn" type="button" data-rest="${exId}">&#9201;</button>
         </div>`;
     } else {
       rows += `
-        <div class="set-row">
-          <span class="set-label">Serie ${i + 1}</span>
-          <div class="field"><input type="number" inputmode="decimal" id="f0-${exId}-${i}" value="${prev ? prev.weight || "" : ""}" placeholder="Kg"></div>
-          <div class="field"><input type="number" inputmode="numeric" id="f1-${exId}-${i}" value="${prev ? prev.reps || "" : ""}" placeholder="Reps"></div>
+        <div class="set-row${done ? " done" : ""}" data-setrow="${i}">
+          <span class="set-label"><span class="set-dot">&#10003;</span>${i + 1}</span>
+          <div class="field"><input type="number" inputmode="decimal" id="f0-${exId}-${i}" value="${prev ? prev.weight || "" : ""}" placeholder="${ls && ls.weight ? ls.weight + " kg" : "Kg"}"></div>
+          <div class="field"><input type="number" inputmode="numeric" id="f1-${exId}-${i}" value="${prev ? prev.reps || "" : ""}" placeholder="${ls && ls.reps ? ls.reps + " reps" : "Reps"}"></div>
           <button class="rest-btn" type="button" data-rest="${exId}">&#9201;</button>
         </div>`;
     }
   }
 
   const headerLine = editing
-    ? `<div class="today-label">Editando &middot; ${editing.dateLabel} <button class="cancel-edit-btn" data-cancel-edit="${exId}" type="button">Cancelar</button></div>`
+    ? `<div class="today-label">Editando &middot; ${editing.dateLabel} <button class="cancel-edit-btn" data-cancel-edit="${exId}" type="button">Volver a hoy</button></div>`
     : `<div class="today-label">Hoy &middot; ${todayLabel}</div>`;
+  const statusHtml = `<span class="save-status${existingEntry ? " saved" : ""}" id="status-${exId}">${existingEntry ? "&#10003; Guardado" : "Se guarda solo"}</span>`;
+  const tab = panelTabByEx[exId] || "log";
 
   const dayId = DAY_OF_EXERCISE[exId] ? DAY_OF_EXERCISE[exId].id : null;
   const restSecs = (dayId && settingsCache.restByDay[dayId]) || 90;
@@ -1401,12 +1493,17 @@ function buildLogForm(exId) {
     `<div class="rest-setting">Descanso: <input type="number" id="rest-secs-${exId}" value="${restSecs}" data-day="${dayId}"> seg</div>`;
 
   return `
-    <div class="log-form">
-      ${headerLine}
-      <div class="last-time-ref">${lastRef}</div>
+    <div class="log-form" id="log-${exId}">
+      <div class="panel-tabs">
+        <button type="button" data-tab="log" data-tab-ex="${exId}" class="${tab === "log" ? "active" : ""}">Registrar</button>
+        <button type="button" data-tab="prog" data-tab-ex="${exId}" class="${tab === "prog" ? "active" : ""}">Progreso</button>
+      </div>
+      <div class="tab-pane${tab === "prog" ? " active" : ""}" id="prog-${exId}"></div>
+      <div class="tab-pane${tab === "log" ? " active" : ""}">
+      <div class="form-top">${headerLine}${statusHtml}</div>
+      ${lastRef}
       ${restSettingHtml}
       ${rows}
-      <button class="save-btn" data-save="${exId}">${editing ? "Actualizar" : "Guardar"}</button>
       <div class="notes-block">
         <div class="notes-label">Notas</div>
         <textarea id="notes-${exId}" placeholder="ej: me dolia el hombro">${cache[exId].notes || ""}</textarea>
@@ -1419,8 +1516,7 @@ function buildLogForm(exId) {
           <input type="file" accept="image/*" capture="environment" id="photo-input-${exId}" style="display:none;">
         </label>
       </div>
-      <div class="history-list" id="history-${exId}"></div>
-      <div class="history-hint">Toca un registro para editarlo.</div>
+      </div>
     </div>
   `;
 }
@@ -1456,19 +1552,32 @@ function resizeImage(file, maxDim, quality) {
 }
 
 function wireLogForm(exId) {
-  document.querySelector(`[data-save="${exId}"]`).addEventListener("click", () => saveEntry(exId));
+  const form = document.getElementById(`log-${exId}`);
+  form.querySelectorAll(`[id^="f0-${exId}"], [id^="f1-${exId}"]`).forEach(el => {
+    el.addEventListener("input", () => { markSetRows(exId); scheduleAutosave(exId); });
+    el.addEventListener("change", () => scheduleAutosave(exId, 150));
+  });
+
+  form.querySelectorAll("[data-tab]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      flushAllPending();
+      panelTabByEx[exId] = btn.getAttribute("data-tab");
+      rerenderExerciseForm(exId);
+    });
+  });
+
+  const copyBtn = form.querySelector(`[data-copy-last="${exId}"]`);
+  if (copyBtn) copyBtn.addEventListener("click", () => copyLastSession(exId));
 
   const cancelBtn = document.querySelector(`[data-cancel-edit="${exId}"]`);
   if (cancelBtn) cancelBtn.addEventListener("click", () => {
+    flushAllPending();
     delete editingDateByEx[exId];
     rerenderExerciseForm(exId);
   });
 
   const notesEl = document.getElementById(`notes-${exId}`);
-  notesEl.addEventListener("blur", async () => {
-    cache[exId].notes = notesEl.value;
-    await persist(exId);
-  });
+  notesEl.addEventListener("input", () => scheduleAutosave(exId, 1200));
 
   const photoInput = document.getElementById(`photo-input-${exId}`);
   photoInput.addEventListener("change", async (e) => {
@@ -1509,7 +1618,7 @@ function wireLogForm(exId) {
   }
 
   wirePhotoThumbs(exId);
-  renderHistory(exId);
+  renderProgress(exId);
 }
 
 function wirePhotoThumbs(exId) {
@@ -1599,74 +1708,337 @@ document.getElementById("lightboxDelete").addEventListener("click", async () => 
   if (strip) { strip.innerHTML = buildPhotosHtml(exId); wirePhotoThumbs(exId); }
 });
 
-async function saveEntry(exId) {
-  const ex = EXERCISE_INDEX[exId];
-  const count = parseSetCount(ex.target, ex.type);
-  const sets = [];
+// ---------- Autoguardado ----------
+const autosaveTimers = {};
+const retryTimers = {};
+let saveChain = Promise.resolve(true);
+const panelTabByEx = {};      // exId -> "log" | "prog"
+const metricByEx = {};        // exId -> metric key
 
+function numVal(v) {
+  if (v === undefined || v === null || v === "") return NaN;
+  return parseFloat(String(v).replace(",", "."));
+}
+
+function collectSets(exId) {
+  const ex = EXERCISE_INDEX[exId];
+  const count = ex.type === "cardio" || ex.type === "activity" ? 1 : parseSetCount(ex.target, ex.type);
+  const sets = [];
+  const val = (id) => { const el = document.getElementById(id); return el ? el.value : ""; };
   for (let i = 0; i < count; i++) {
     if (ex.type === "cardio") {
-      const duration = document.getElementById(`f0-${exId}`).value;
-      const rpe = document.getElementById(`f1-${exId}`).value;
+      const duration = val(`f0-${exId}`), rpe = val(`f1-${exId}`);
       if (duration) sets.push({ duration, rpe });
     } else if (ex.type === "activity") {
-      const duration = document.getElementById(`f0-${exId}`).value;
-      const note = document.getElementById(`f1-${exId}`).value;
+      const duration = val(`f0-${exId}`), note = val(`f1-${exId}`);
       if (duration || note) sets.push({ duration, note });
     } else if (ex.type === "carry") {
-      const weight = document.getElementById(`f0-${exId}-${i}`).value;
-      const distance = document.getElementById(`f1-${exId}-${i}`).value;
+      const weight = val(`f0-${exId}-${i}`), distance = val(`f1-${exId}-${i}`);
       if (weight || distance) sets.push({ weight, distance });
     } else {
-      const weight = document.getElementById(`f0-${exId}-${i}`).value;
-      const reps = document.getElementById(`f1-${exId}-${i}`).value;
+      const weight = val(`f0-${exId}-${i}`), reps = val(`f1-${exId}-${i}`);
       if (weight || reps) sets.push({ weight, reps });
     }
   }
+  return sets;
+}
 
-  if (sets.length === 0) { showToast("Rellena al menos una serie"); return; }
+function markSetRows(exId) {
+  const ex = EXERCISE_INDEX[exId];
+  document.querySelectorAll(`#log-${exId} [data-setrow]`).forEach(row => {
+    const i = row.getAttribute("data-setrow");
+    const a = document.getElementById(`f0-${exId}-${i}`), b = document.getElementById(`f1-${exId}-${i}`);
+    row.classList.toggle("done", !!(a && a.value && b && b.value));
+  });
+}
 
+function setSaveStatus(exId, state) {
+  const el = document.getElementById(`status-${exId}`);
+  if (!el) return;
+  el.className = "save-status " + state;
+  el.innerHTML = { pending: "Editando...", saving: "Guardando...", saved: "&#10003; Guardado",
+                   error: "Sin conexion &middot; reintentando" }[state] || "";
+}
+
+function scheduleAutosave(exId, delay) {
+  setSaveStatus(exId, "pending");
+  clearTimeout(autosaveTimers[exId]);
+  autosaveTimers[exId] = setTimeout(() => flushAutosave(exId), delay || 800);
+}
+
+function flushAllPending() {
+  Object.keys(autosaveTimers).forEach(id => flushAutosave(id));
+}
+
+async function flushAutosave(exId) {
+  clearTimeout(autosaveTimers[exId]);
+  delete autosaveTimers[exId];
+  if (!document.getElementById(`log-${exId}`)) return;
+
+  // todo lo que lee del formulario va antes del primer await,
+  // asi funciona aunque el panel se cierre justo despues
+  const sets = collectSets(exId);
+  const notesEl = document.getElementById(`notes-${exId}`);
+  if (notesEl) cache[exId].notes = notesEl.value;
   const editing = editingDateByEx[exId];
   const today = new Date();
   const dateKey = editing ? editing.dateKey : dateKeyFor(today);
   const dateLabel = editing ? editing.dateLabel : labelFor(today);
+  const h = cache[exId].history;
+  const idx = h.findIndex(e => e.dateKey === dateKey);
+  if (sets.length > 0) upsertHistory(exId, dateKey, dateLabel, sets);
+  else if (idx >= 0) h.splice(idx, 1);
 
-  upsertHistory(exId, dateKey, dateLabel, sets);
-  const ok = await persist(exId);
-  const wasEditing = !!editing;
-  delete editingDateByEx[exId];
+  setSaveStatus(exId, "saving");
+  refreshAfterChange(exId);
+  saveChain = saveChain.then(() => persist(exId, true));
+  const ok = await saveChain;
+  if (autosaveTimers[exId]) return; // ya hay otro cambio en cola
+  if (ok) {
+    setSaveStatus(exId, "saved");
+  } else {
+    setSaveStatus(exId, "error");
+    clearTimeout(retryTimers[exId]);
+    retryTimers[exId] = setTimeout(async () => {
+      const ok2 = await persist(exId, true);
+      if (!autosaveTimers[exId]) setSaveStatus(exId, ok2 ? "saved" : "error");
+      if (!ok2) showToast("No se pudo guardar. Revisa la conexion");
+    }, 5000);
+  }
+}
+
+function refreshAfterChange(exId) {
   refreshSummary(exId);
-  rerenderExerciseForm(exId);
   renderCalendar();
   refreshDayProgress();
   refreshExtraCardSummaries();
-  if (ok) showToast(wasEditing ? "Actualizado" : "Guardado");
+  renderProgress(exId);
 }
 
-function renderHistory(exId) {
-  const container = document.getElementById(`history-${exId}`);
-  if (!container) return;
-  const ex = EXERCISE_INDEX[exId];
-  const history = cache[exId].history || [];
-  if (history.length === 0) {
-    container.innerHTML = `<div class="history-empty">Todavia no hay registros para este ejercicio.</div>`;
-    return;
-  }
-  container.innerHTML = history.slice(0, 6).map(h => `
-    <div class="history-row" data-edit-entry="${h.dateKey}">
-      <span>${h.dateLabel}</span>
-      <span class="w">${formatSetsSummary(ex.type, h.sets)}</span>
-    </div>
-  `).join("");
-  container.querySelectorAll("[data-edit-entry]").forEach(row => {
-    row.addEventListener("click", () => {
-      const dateKey = row.getAttribute("data-edit-entry");
-      const entry = history.find(h => h.dateKey === dateKey);
-      if (!entry) return;
-      editingDateByEx[exId] = { dateKey: entry.dateKey, dateLabel: entry.dateLabel };
-      rerenderExerciseForm(exId);
-    });
+function copyLastSession(exId) {
+  const editing = editingDateByEx[exId];
+  const activeKey = editing ? editing.dateKey : dateKeyFor(new Date());
+  const last = (cache[exId].history || []).find(e => e.dateKey !== activeKey);
+  if (!last) return;
+  last.sets.forEach((st, i) => {
+    const a = document.getElementById(`f0-${exId}-${i}`), b = document.getElementById(`f1-${exId}-${i}`);
+    if (a && st.weight) a.value = st.weight;
+    if (b) b.value = EXERCISE_INDEX[exId].type === "carry" ? (st.distance || "") : (st.reps || "");
   });
+  markSetRows(exId);
+  scheduleAutosave(exId, 150);
+}
+
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flushAllPending(); });
+window.addEventListener("pagehide", flushAllPending);
+
+// ---------- Progreso ----------
+function metricsFor(type) {
+  const sum = (arr) => arr.reduce((a, b) => a + b, 0);
+  const nums = (sets, k) => sets.map(s => numVal(s[k])).filter(n => !isNaN(n));
+  if (type === "carry") return [
+    { key: "top", label: "Peso max", unit: "kg", fn: sets => { const w = nums(sets, "weight"); return w.length ? Math.max(...w) : NaN; } },
+    { key: "dist", label: "Metros", unit: "m", fn: sets => { const d = nums(sets, "distance"); return d.length ? sum(d) : NaN; } }
+  ];
+  if (type === "cardio" || type === "activity") return [
+    { key: "min", label: "Minutos", unit: "min", fn: sets => { const d = nums(sets, "duration"); return d.length ? sum(d) : NaN; } }
+  ];
+  return [
+    { key: "top", label: "Peso max", unit: "kg", fn: sets => { const w = nums(sets, "weight"); return w.length ? Math.max(...w) : NaN; } },
+    { key: "reps", label: "Reps totales", unit: "reps", fn: sets => { const r = nums(sets, "reps"); return r.length ? sum(r) : NaN; } },
+    { key: "vol", label: "Volumen", unit: "kg", fn: sets => {
+        let v = 0, any = false;
+        sets.forEach(st => { const w = numVal(st.weight), r = numVal(st.reps); if (!isNaN(w) && !isNaN(r)) { v += w * r; any = true; } });
+        return any ? v : NaN; } }
+  ];
+}
+
+function fmtNum(n) {
+  if (isNaN(n)) return "-";
+  const r = Math.round(n * 10) / 10;
+  return r >= 1000 ? Math.round(r).toLocaleString("es-ES") : String(r).replace(".", ",");
+}
+
+function seriesFor(exId, metric) {
+  const hist = (cache[exId].history || []).slice().sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+  return hist.map(e => ({ dateKey: e.dateKey, dateLabel: e.dateLabel, sets: e.sets, v: metric.fn(e.sets) }))
+             .filter(p => !isNaN(p.v));
+}
+
+function setChipsHtml(type, sets) {
+  if (!sets || !sets.length) return "";
+  if (type === "cardio") return sets.map(st => `<span class="chip">${st.duration || "?"} min${st.rpe ? " &middot; " + st.rpe : ""}</span>`).join("");
+  if (type === "activity") return sets.map(st => `<span class="chip">${st.duration ? st.duration + " min" : ""}${st.duration && st.note ? " &middot; " : ""}${st.note || ""}</span>`).join("");
+  const ws = sets.map(st => numVal(st.weight)).filter(n => !isNaN(n));
+  const top = ws.length ? Math.max(...ws) : NaN;
+  let topMarked = false;
+  return sets.map(st => {
+    const isTop = !topMarked && numVal(st.weight) === top;
+    if (isTop) topMarked = true;
+    const second = type === "carry" ? (st.distance || "?") + " m" : "&times;" + (st.reps || "?");
+    return `<span class="chip${isTop && sets.length > 1 ? " top" : ""}">${st.weight ? String(st.weight).replace(".", ",") : "?"}${type === "carry" ? " kg &middot; " : " "}${second}</span>`;
+  }).join("");
+}
+
+function renderSpark(exId) {
+  const svg = document.getElementById(`spark-${exId}`);
+  if (!svg) return;
+  const ex = EXERCISE_INDEX[exId] || BASE_DEFS[exId];
+  const type = ex ? ex.type : "sets";
+  const metric = metricsFor(type)[0];
+  const pts = seriesFor(exId, metric).slice(-8);
+  if (pts.length < 2) { svg.innerHTML = ""; svg.style.display = "none"; return; }
+  svg.style.display = "block";
+  const vs = pts.map(p => p.v), min = Math.min(...vs), max = Math.max(...vs), span = (max - min) || 1;
+  const xy = pts.map((p, i) => [3 + i * (58 / (pts.length - 1)), 17 - ((p.v - min) / span) * 14]);
+  const d = xy.map((c, i) => (i ? "L" : "M") + c[0].toFixed(1) + " " + c[1].toFixed(1)).join(" ");
+  const lastPt = xy[xy.length - 1];
+  svg.innerHTML = `<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lastPt[0]}" cy="${lastPt[1]}" r="2.5" fill="var(--accent)"/>`;
+}
+
+function niceTicks(min, max) {
+  if (min === max) { const pad = Math.max(1, Math.abs(min) * 0.1); min -= pad; max += pad; }
+  const raw = (max - min) / 3;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(st => st >= raw) || 10 * mag;
+  const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step;
+  const ticks = [];
+  for (let t = lo; t <= hi + step / 2; t += step) ticks.push(Math.round(t * 100) / 100);
+  return { lo, hi, ticks };
+}
+
+function renderProgress(exId) {
+  const pane = document.getElementById(`prog-${exId}`);
+  if (!pane) return;
+  const ex = EXERCISE_INDEX[exId];
+  const metrics = metricsFor(ex.type);
+  let metric = metrics.find(m => m.key === metricByEx[exId]) || metrics[0];
+  const all = seriesFor(exId, metric);
+  const pts = all.slice(-12);
+  const unit = metric.unit;
+
+  // ---- tarjetas de resumen
+  let tiles = "";
+  if (all.length) {
+    const last = all[all.length - 1];
+    const best = all.reduce((a, b) => (b.v > a.v ? b : a), all[0]);
+    const first = pts[0];
+    const diff = last.v - first.v;
+    const trend = pts.length < 2 ? `<span>-</span>`
+      : diff > 0 ? `<span class="trend-up">&#9650; ${fmtNum(diff)}</span>`
+      : diff < 0 ? `<span class="trend-down">&#9660; ${fmtNum(Math.abs(diff))}</span>` : `<span>= 0</span>`;
+    tiles = `
+      <div class="stat-grid">
+        <div class="stat-tile"><div class="k">Ultima</div><div class="v">${fmtNum(last.v)}<small>${unit}</small></div><div class="s">${last.dateLabel}</div></div>
+        <div class="stat-tile"><div class="k">Record</div><div class="v">${fmtNum(best.v)}<small>${unit}</small></div><div class="s">${best.dateLabel}</div></div>
+        <div class="stat-tile"><div class="k">Cambio</div><div class="v" style="font-size:18px">${trend}${pts.length < 2 ? "" : `<small>${unit}</small>`}</div><div class="s">en ${pts.length} sesiones</div></div>
+        <div class="stat-tile"><div class="k">Sesiones</div><div class="v">${(cache[exId].history || []).length}</div><div class="s">registradas</div></div>
+      </div>`;
+  }
+
+  const metricTabs = metrics.length > 1
+    ? `<div class="metric-tabs">${metrics.map(m => `<button type="button" data-metric="${m.key}" class="${m.key === metric.key ? "active" : ""}">${m.label}</button>`).join("")}</div>`
+    : "";
+
+  // ---- grafica
+  let chart;
+  pane._chart = null;
+  if (pts.length < 2) {
+    chart = `<div class="chart-wrap"><div class="chart-empty">${pts.length ? "Registra una sesion mas y aqui veras tu grafica." : "Todavia no hay datos. Registra tu primera sesion."}</div></div>`;
+  } else {
+    const W = 340, H = 170, L = 36, R = 14, T = 22, B = 24;
+    const vs = pts.map(p => p.v);
+    const { lo, hi, ticks } = niceTicks(Math.min(...vs), Math.max(...vs));
+    const x = i => L + i * ((W - L - R) / (pts.length - 1));
+    const y = v => T + (1 - (v - lo) / ((hi - lo) || 1)) * (H - T - B);
+    const grid = ticks.map(t => `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}" stroke="var(--separator)" stroke-width="1"/>
+      <text x="${L - 6}" y="${y(t) + 3.5}" text-anchor="end" font-size="10" fill="var(--text-secondary)">${fmtNum(t)}</text>`).join("");
+    const line = pts.map((p, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(p.v).toFixed(1)).join(" ");
+    const area = line + ` L${x(pts.length - 1).toFixed(1)} ${H - B} L${L} ${H - B} Z`;
+    const bestIdx = vs.indexOf(Math.max(...vs));
+    const lastIdx = pts.length - 1;
+    const dots = pts.map((p, i) => `<circle cx="${x(i)}" cy="${y(p.v)}" r="${i === lastIdx ? 5 : 4}" fill="var(--accent)" stroke="var(--card-3)" stroke-width="2"/>`).join("");
+    const xl = [0, Math.floor(lastIdx / 2), lastIdx].filter((v, i, a) => a.indexOf(v) === i)
+      .map(i => `<text x="${x(i)}" y="${H - 6}" text-anchor="${i === 0 ? "start" : i === lastIdx ? "end" : "middle"}" font-size="10" fill="var(--text-secondary)">${pts[i].dateLabel}</text>`).join("");
+    const lbl = (i, txt) => `<text x="${x(i)}" y="${y(pts[i].v) - 10}" text-anchor="${i === lastIdx ? "end" : i === 0 ? "start" : "middle"}" font-size="11" font-weight="700" fill="var(--text)">${txt}</text>`;
+    const labels = lbl(lastIdx, fmtNum(pts[lastIdx].v) + " " + unit) + (bestIdx !== lastIdx ? lbl(bestIdx, "&#9733; " + fmtNum(pts[bestIdx].v)) : "");
+    chart = `
+      <div class="chart-wrap" id="chart-${exId}">
+        <div class="chart-tip" id="tip-${exId}"></div>
+        <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${metric.label} por sesion">
+          <defs><linearGradient id="g-${exId}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--accent)" stop-opacity="0.22"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>
+          </linearGradient></defs>
+          ${grid}
+          <path d="${area}" fill="url(#g-${exId})"/>
+          <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          <line id="cross-${exId}" x1="0" x2="0" y1="${T - 6}" y2="${H - B}" stroke="var(--text-secondary)" stroke-width="1" stroke-dasharray="3 3" style="display:none"/>
+          ${dots}
+          ${labels}
+          ${xl}
+        </svg>
+      </div>`;
+    pane._chart = { pts, x, W, unit, type: ex.type };
+  }
+
+  // ---- ultimas sesiones
+  const hist = cache[exId].history || [];
+  const bestTop = (() => { const m = metrics[0]; const s = seriesFor(exId, m); return s.length ? Math.max(...s.map(p => p.v)) : NaN; })();
+  const sessions = hist.slice(0, 8).map(e => {
+    const v = metrics[0].fn(e.sets);
+    const isPR = hist.length > 1 && !isNaN(v) && v === bestTop;
+    return `<div class="session-row" data-edit-entry="${e.dateKey}">
+      <div class="session-date">${e.dateLabel}</div>
+      <div class="session-chips">${setChipsHtml(ex.type, e.sets)}</div>
+      ${isPR ? `<span class="pr-badge">Record</span>` : ""}
+    </div>`;
+  }).join("");
+
+  pane.innerHTML = tiles + metricTabs + chart +
+    (hist.length ? `<div class="section-title">Ultimas sesiones &middot; toca para editar</div>${sessions}` : "");
+
+  pane.querySelectorAll("[data-metric]").forEach(btn => btn.addEventListener("click", () => {
+    metricByEx[exId] = btn.getAttribute("data-metric");
+    renderProgress(exId);
+  }));
+  pane.querySelectorAll("[data-edit-entry]").forEach(row => row.addEventListener("click", () => {
+    flushAllPending();
+    const entry = hist.find(h => h.dateKey === row.getAttribute("data-edit-entry"));
+    if (!entry) return;
+    editingDateByEx[exId] = { dateKey: entry.dateKey, dateLabel: entry.dateLabel };
+    panelTabByEx[exId] = "log";
+    rerenderExerciseForm(exId);
+  }));
+  wireChartHover(exId);
+}
+
+function wireChartHover(exId) {
+  const wrap = document.getElementById(`chart-${exId}`);
+  const pane = document.getElementById(`prog-${exId}`);
+  if (!wrap || !pane || !pane._chart) return;
+  const { pts, x, W, unit, type } = pane._chart;
+  const svg = wrap.querySelector("svg");
+  const tip = document.getElementById(`tip-${exId}`);
+  const cross = document.getElementById(`cross-${exId}`);
+  const show = (clientX) => {
+    const r = svg.getBoundingClientRect();
+    const vx = (clientX - r.left) * (W / r.width);
+    let best = 0;
+    pts.forEach((p, i) => { if (Math.abs(x(i) - vx) < Math.abs(x(best) - vx)) best = i; });
+    const p = pts[best];
+    cross.setAttribute("x1", x(best)); cross.setAttribute("x2", x(best)); cross.style.display = "";
+    const detail = (type === "sets") ? p.sets.map(st => st.reps || "?").join(" &middot; ") + " reps" : "";
+    tip.innerHTML = `${p.dateLabel} &middot; <b>${fmtNum(p.v)} ${unit}</b>${detail ? "<br>" + detail : ""}`;
+    tip.style.display = "block";
+    const px = (x(best) / W) * r.width + 6;
+    const half = tip.offsetWidth / 2;
+    tip.style.left = Math.min(Math.max(px, half + 4), wrap.clientWidth - half - 4) + "px";
+  };
+  const hide = () => { tip.style.display = "none"; cross.style.display = "none"; };
+  wrap.addEventListener("pointerdown", e => show(e.clientX));
+  wrap.addEventListener("pointermove", e => show(e.clientX));
+  wrap.addEventListener("pointerleave", hide);
 }
 
 let toastTimer = null;
