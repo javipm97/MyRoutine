@@ -993,6 +993,16 @@
   /* cronometro: pastilla flotante solo durante el entreno */
   .session-timer { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 50%; transform: translateX(-50%); z-index: 35;
     background: var(--brand); border-color: rgba(255,255,255,0.3); box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
+
+  /* ---- Editar / borrar registros ---- */
+  .detail-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--separator); }
+  .dact { border: none; background: var(--accent-soft); color: var(--accent); font: inherit; font-size: 13.5px; font-weight: 700; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+  .dact.danger { background: rgba(229,53,43,0.12); color: #E5352B; }
+  .del-entry-btn { display: block; width: 100%; margin: 6px 0 2px 0; border: 1.5px solid rgba(229,53,43,0.35); background: none; color: #E5352B; font: inherit; font-size: 14px; font-weight: 700; padding: 10px; border-radius: 999px; cursor: pointer; }
+  .opt-row { display: block; width: 100%; text-align: left; border: none; background: var(--card-3); color: var(--text); font: inherit; padding: 13px 14px; border-radius: 14px; margin-bottom: 8px; cursor: pointer; }
+  .opt-row b { display: block; font-size: 15px; }
+  .opt-row span { display: block; font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+  .opt-row.danger b { color: #E5352B; }
 </style>
 </head>
 <body>
@@ -1785,29 +1795,36 @@ function openDetail(dateKey) {
   document.getElementById("detailSub").textContent = dayRef ? dayRef.title.replace(/&middot;/, "\u00b7") : "";
 
   const list = document.getElementById("detailList");
-  const recs = workoutsList().filter(w => w.dateKey === dateKey && w.end);
+  const recs = workoutsList().filter(w => w.dateKey === dateKey && w.end && !w.deleted);
   const recHtml = recs.map(w => {
     const d = LIVE_DAYS.concat(BASE_ROUTINE).find(x => x.id === w.dayId);
     return `<div class="detail-item detail-workout">
       <div class="exercise-name">${d ? plain(d.title) : "Entreno"} &middot; completado</div>
       <div class="dw-stats"><span><b>${fmtKg(w.volume)}</b> kg</span>${w.start ? `<span><b>${fmtDuration(w.end - w.start)}</b></span>` : ""}<span><b>${w.sets}</b> series</span></div>
       ${moodSummaryHtml(w)}
+      <div class="detail-actions"><button type="button" class="dact" data-wk-opts="${w.dayId}">&#8943; Opciones del entreno</button></div>
     </div>`;
   }).join("");
   if (items.length === 0) {
     list.innerHTML = recHtml || `<div class="detail-empty">No hay ejercicios registrados este dia.</div>`;
   } else {
     list.innerHTML = recHtml + items.map(({ exId, entry }) => {
-      const ex = EXERCISE_INDEX[exId];
-      const summary = formatSetsSummary(ex.type, entry.sets);
+      const ex = EXERCISE_INDEX[exId] || defOf(exId) || { type: "sets" };
       return `
         <div class="detail-item">
-          <div class="exercise-name">${displayName(exId)}</div>
+          <div class="exercise-name">${esc(displayName(exId))}</div>
           <div class="session-chips">${setChipsHtml(ex.type, entry.sets) || "&mdash;"}</div>
+          <div class="detail-actions">
+            <button type="button" class="dact" data-edit-entry-at="${exId}">&#9998; Editar</button>
+            <button type="button" class="dact danger" data-del-entry-at="${exId}">&#128465; Borrar</button>
+          </div>
         </div>
       `;
     }).join("");
   }
+  list.querySelectorAll("[data-edit-entry-at]").forEach(b => b.addEventListener("click", () => editEntryAt(b.getAttribute("data-edit-entry-at"), dateKey)));
+  list.querySelectorAll("[data-del-entry-at]").forEach(b => b.addEventListener("click", () => deleteEntryAt(b.getAttribute("data-del-entry-at"), dateKey)));
+  list.querySelectorAll("[data-wk-opts]").forEach(b => b.addEventListener("click", () => openWorkoutOptions(b.getAttribute("data-wk-opts"), dateKey)));
 
   showView("view-detail");
 }
@@ -2653,6 +2670,7 @@ function buildLogForm(exId) {
       ${restSettingHtml}
       ${ex.type === "sets" ? `<div class="set-head"><span class="sh-lbl"></span><span>Kg</span><span>Reps</span><span class="sh-rir">RIR</span><span class="sh-rest"></span></div>` : ""}
       ${rows}
+      ${existingEntry ? `<button type="button" class="del-entry-btn" data-del-current="${exId}">&#128465; Borrar el registro del ${editing ? editing.dateLabel : "dia de hoy"}</button>` : ""}
       <div class="notes-block">
         <div class="notes-label">Notas</div>
         <textarea id="notes-${exId}" placeholder="ej: me dolia el hombro">${cache[exId].notes || ""}</textarea>
@@ -2717,6 +2735,16 @@ function wireLogForm(exId) {
 
   const wimp = document.getElementById(`wimp-${exId}`);
   if (wimp) wimp.addEventListener("change", e => { const files = Array.from(e.target.files || []); wimp.value = ""; if (files.length) importWatchShots(exId, files); });
+
+  const delCur = form.querySelector(`[data-del-current="${exId}"]`);
+  if (delCur) delCur.addEventListener("click", async () => {
+    const editing = editingDateByEx[exId];
+    const dk = editing ? editing.dateKey : dateKeyFor(new Date());
+    const ok = await removeEntry(exId, dk, true);
+    if (!ok) return;
+    delete editingDateByEx[exId];
+    rerenderExerciseForm(exId);
+  });
 
   const copyBtn = form.querySelector(`[data-copy-last="${exId}"]`);
   if (copyBtn) copyBtn.addEventListener("click", () => copyLastSession(exId));
@@ -3235,7 +3263,7 @@ appScroller.addEventListener("scroll", () => {
 
 // ---------- Entrenamiento finalizado ----------
 function workoutsList() { if (!Array.isArray(settingsCache.workouts)) settingsCache.workouts = []; return settingsCache.workouts; }
-function finishedWorkout(dayId, dateKey) { return workoutsList().find(w => w.dayId === dayId && w.dateKey === dateKey && w.end) || null; }
+function finishedWorkout(dayId, dateKey) { return workoutsList().find(w => w.dayId === dayId && w.dateKey === dateKey && w.end && !w.deleted) || null; }
 function isRoutineDay(id) { return LIVE_DAYS.some(d => d.id === id); }
 
 function markWorkoutStart() {
@@ -3357,7 +3385,7 @@ function workoutStats(dayId, dateKey) {
   const a = settingsCache.activeWorkout;
   const start = fin ? fin.start : (a && a.dayId === dayId && a.dateKey === dateKey ? a.start : null);
   const end = fin ? fin.end : Date.now();
-  const prevW = workoutsList().filter(w => w.dayId === dayId && w.dateKey < dateKey && w.start && w.end).sort((x, y) => y.dateKey.localeCompare(x.dateKey))[0];
+  const prevW = workoutsList().filter(w => w.dayId === dayId && w.dateKey < dateKey && w.start && w.end && !w.deleted).sort((x, y) => y.dateKey.localeCompare(x.dateKey))[0];
 
   const prog = todayProgressFor(day);
   return {
@@ -3393,6 +3421,9 @@ async function finishWorkout() {
     const a = settingsCache.activeWorkout;
     fin = { dayId, dateKey: todayKey, updated: Date.now(), start: (a && a.dayId === dayId && a.dateKey === todayKey) ? a.start : null, end: Date.now(),
             volume: Math.round(st.today.volume), sets: st.today.sets, reps: st.today.reps };
+    const old = workoutsList().filter(w => w.dayId === dayId && w.dateKey === todayKey);
+    old.forEach(w => { fin.updated = Math.max(fin.updated, (w.updated || 0) + 1); });
+    settingsCache.workouts = workoutsList().filter(w => !(w.dayId === dayId && w.dateKey === todayKey));
     workoutsList().push(fin);
     if (settingsCache.workouts.length > 400) settingsCache.workouts = settingsCache.workouts.slice(-400);
     settingsCache.activeWorkout = null;
@@ -3413,7 +3444,8 @@ function deltaPill(d, goodWhenUp) {
   return `<span class="delta ${d.pc === 0 ? "flat" : good ? "up" : "down"}">${d.pc > 0 ? "&#9650;" : d.pc < 0 ? "&#9660;" : "="} ${d.txt.replace("+", "").replace("-", "")}</span>`;
 }
 
-function showFinishOverlay(st, celebrate) {
+function showFinishOverlay(st, celebrate, atKey) {
+  const atDate = atKey ? new Date(atKey + "T00:00:00") : new Date();
   document.querySelectorAll(".finish-overlay").forEach(o => o.remove());
   const t = st.today;
   const vsPrev = st.prev ? pctTxt(t.volume, st.prev.volume) : null;
@@ -3450,7 +3482,7 @@ function showFinishOverlay(st, celebrate) {
     <div class="finish-scroll">
       <div class="finish-hero">
         <div class="check-anim"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27 l7 7 l15 -16"/></svg></div>
-        <div class="finish-kicker">${plain(st.day.title)} &middot; ${labelFor(new Date())}</div>
+        <div class="finish-kicker">${plain(st.day.title)} &middot; ${labelFor(atDate)}</div>
         <div class="finish-title">${st.prs.length ? "Entreno con record" : "Entreno completado"}</div>
         <div class="finish-big"><span class="count" data-to="${Math.round(t.volume)}">0</span><small> kg</small></div>
         <div class="finish-big-lbl">Volumen total levantado ${deltaPill(vsPrev, true)}</div>
@@ -3479,7 +3511,7 @@ function showFinishOverlay(st, celebrate) {
   requestAnimationFrame(() => ov.classList.add("open"));
   ov.querySelectorAll(".count").forEach(el => countUp(el, parseFloat(el.getAttribute("data-to")) || 0));
   if (celebrate) runConfetti(document.getElementById("confetti"));
-  renderMoodCard(st.day.id, dateKeyFor(new Date()));
+  renderMoodCard(st.day.id, dateKeyFor(atDate));
   document.getElementById("finishClose").addEventListener("click", () => {
     ov.classList.remove("open");
     setTimeout(() => ov.remove(), 250);
@@ -3542,7 +3574,7 @@ const MOOD_TAGS = [
 const PAIN_ZONES = ["Hombro", "Codo", "Muneca", "Cuello", "Espalda alta", "Espalda baja", "Cadera", "Rodilla", "Tobillo", "Otra"];
 let moodSaveTimer = null;
 function saveMoodSoon() { clearTimeout(moodSaveTimer); moodSaveTimer = setTimeout(() => persistSettings(), 700); }
-function touchWorkout(dayId, dateKey) { const r = finishedWorkout(dayId, dateKey); if (r) r.updated = Date.now(); }
+function touchWorkout(dayId, dateKey) { const r = finishedWorkout(dayId, dateKey); if (r) r.updated = Math.max(Date.now(), (r.updated || 0) + 1); }
 
 function renderMoodCard(dayId, dateKey) {
   const box = document.getElementById("moodCard");
@@ -4064,6 +4096,73 @@ async function importWatchShots(exId, files) {
     say("No se pudo leer la captura (" + (e && e.message ? e.message : "error") + "). Rellena los datos a mano o prueba de nuevo con conexion.", "warn");
   }
 }
+
+// ---------- Editar y borrar registros anteriores ----------
+async function removeEntry(exId, dateKey, ask) {
+  const e = (cache[exId].history || []).find(h => h.dateKey === dateKey);
+  if (!e) return false;
+  if (ask && !confirm(`Borrar ${displayName(exId)} del ${e.dateLabel}? Se borran sus series de ese dia.`)) return false;
+  clearTimeout(autosaveTimers[exId]); delete autosaveTimers[exId];
+  cache[exId].history = cache[exId].history.filter(h => h.dateKey !== dateKey);
+  const ok = await persist(exId);
+  refreshSummary(exId); renderCalendar(); refreshDayProgress(); refreshExtraCardSummaries();
+  if (ok) showToast("Registro borrado");
+  return ok;
+}
+async function deleteEntryAt(exId, dateKey) {
+  const ok = await removeEntry(exId, dateKey, true);
+  if (ok) openDetail(dateKey);
+}
+function editEntryAt(exId, dateKey) {
+  const entry = (cache[exId].history || []).find(h => h.dateKey === dateKey);
+  if (!entry) return;
+  const day = dayForEntry(exId, entry);
+  const live = day && LIVE_DAYS.concat(EXTRA_DAYS).find(d => d.id === day.id && d.exercises.some(x => x.id === exId));
+  const target = live || LIVE_DAYS.concat(EXTRA_DAYS).find(d => d.exercises.some(x => x.id === exId));
+  if (!target) { showToast("Este ejercicio ya no esta en ningun dia. Puedes borrar el registro desde aqui."); return; }
+  openDay(target.id);
+  toggleExercise(exId);
+  if (dateKey !== dateKeyFor(new Date())) editingDateByEx[exId] = { dateKey, dateLabel: entry.dateLabel };
+  panelTabByEx[exId] = "log";
+  rerenderExerciseForm(exId);
+  const card = document.getElementById(`body-${exId}`);
+  if (card) setTimeout(() => card.parentElement.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+}
+function openWorkoutOptions(dayId, dateKey) {
+  const rec = finishedWorkout(dayId, dateKey);
+  const day = BASE_ROUTINE.find(d => d.id === dayId);
+  if (!rec) return;
+  const sheet = openSheet(`
+    <div class="sheet-title">${day ? plain(day.title) : "Entreno"} &middot; ${labelFor(new Date(dateKey + "T00:00:00"))}</div>
+    <div class="sheet-hint">Que quieres hacer con este entreno finalizado?</div>
+    <button class="opt-row" type="button" id="woSummary"><b>&#128202; Ver el resumen</b><span>Estadisticas y como te sentiste</span></button>
+    <button class="opt-row" type="button" id="woUnfinish"><b>&#8617;&#65039; Quitar el "completado"</b><span>Las series se quedan; podras volver a finalizarlo</span></button>
+    <button class="opt-row danger" type="button" id="woDelete"><b>&#128465; Borrar el entreno entero</b><span>Borra el completado y todas las series de ese dia</span></button>
+    <button class="sheet-danger" type="button" style="color:var(--text-secondary)" onclick="closeSheet()">Cancelar</button>`);
+  const tomb = () => { rec.deleted = true; rec.updated = Math.max(Date.now(), (rec.updated || 0) + 1); };
+  sheet.querySelector("#woSummary").addEventListener("click", () => {
+    closeSheet(true);
+    const prevDay = currentDayId; currentDayId = dayId;
+    showFinishOverlay(workoutStatsAt(dayId, dateKey), false, dateKey);
+    currentDayId = prevDay;
+  });
+  sheet.querySelector("#woUnfinish").addEventListener("click", async () => {
+    tomb(); closeSheet(); await persistSettings();
+    renderHome(); renderFinishButton(); openDetail(dateKey); showToast("Ya no esta marcado como completado");
+  });
+  sheet.querySelector("#woDelete").addEventListener("click", async () => {
+    if (!confirm("Borrar el entreno completo de ese dia? No se puede deshacer.")) return;
+    tomb();
+    const d = LIVE_DAYS.find(x => x.id === dayId) || day;
+    const ids = Object.keys(cache).filter(id => (cache[id].history || []).some(h => h.dateKey === dateKey && entryBelongsToDay(id, h, d)));
+    ids.forEach(id => { cache[id].history = cache[id].history.filter(h => !(h.dateKey === dateKey && entryBelongsToDay(id, h, d))); });
+    closeSheet();
+    await Promise.all(ids.map(id => persist(id)).concat([persistSettings()]));
+    ids.forEach(refreshSummary); renderCalendar(); renderFinishButton(); openDetail(dateKey);
+    showToast("Entreno borrado");
+  });
+}
+function workoutStatsAt(dayId, dateKey) { return workoutStats(dayId, dateKey); }
 
 (function setupInstallCard() {
   const standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
