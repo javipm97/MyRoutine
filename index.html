@@ -696,6 +696,14 @@
   .pick-row:last-child { border-bottom: none; }
   .pick-check { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--accent-soft); color: var(--accent); font-weight: 800; font-size: 16px; }
   .pick-row.on .pick-check { background: var(--green); color: #fff; }
+  .r2-list { max-height: 54vh; overflow-y: auto; border-radius: 16px; background: var(--card-3); padding: 2px 14px 6px; }
+  .r2-day { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); margin: 14px 0 4px; }
+  .r2-day.upper { color: var(--brand); }
+  .r2-day.lower { color: var(--lower); }
+  .r2-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--separator); font-size: 14.5px; }
+  .r2-tag { flex-shrink: 0; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .r2-tag.new { background: var(--accent-soft); color: var(--accent); }
+  .r2-tag.kept { background: var(--green-soft); color: var(--green); }
 
   /* ---- Clasificacion ---- */
   .ctag, .ptag { font-size: 11px; font-weight: 800; padding: 3px 7px; border-radius: 7px; white-space: nowrap; }
@@ -1257,7 +1265,8 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 const ROUTINE = [
   {
     id: "d1", badge: "upper", emoji: "&#128170;",
-    title: "Dia 1 &middot; Upper", sub: "Fuerza &middot; 5 ejercicios", note: null,
+    title: "Dia 1 &middot; Upper A", sub: "Fuerza &middot; 8 ejercicios",
+    note: "Superseries: 1+2, 3+4, 5+6, 7+8. Haces uno, ~60s, el otro, ~60s, y repites. Si vas justo de tiempo, quita 7+8.",
     exercises: [
       { id: "d1-e1", name: "Press banca mancuernas (neutro)", target: "4x6-8", type: "sets" },
       { id: "d1-e2", name: "Remo con barra o maquina", target: "4x8-10", type: "sets" },
@@ -1268,8 +1277,8 @@ const ROUTINE = [
   },
   {
     id: "d2", badge: "lower", emoji: "&#129461;",
-    title: "Dia 2 &middot; Lower", sub: "Fuerza &middot; 5 ejercicios",
-    note: "5 min calentamiento lateral antes &middot; 5 min movilidad cadera/tobillo al final.",
+    title: "Dia 2 &middot; Lower A", sub: "Fuerza &middot; 5 ejercicios",
+    note: "5 min calentamiento lateral antes. Descansa 2-3 min en sentadilla y rumano. Superserie 4+5. 5 min movilidad cadera/tobillo al final.",
     exercises: [
       { id: "d2-e1", name: "Sentadilla o prensa", target: "4x6-8", type: "sets" },
       { id: "d2-e2", name: "Peso muerto rumano", target: "3x8-10", type: "sets" },
@@ -1280,8 +1289,8 @@ const ROUTINE = [
   },
   {
     id: "d3", badge: "upper", emoji: "&#128170;",
-    title: "Dia 3 &middot; Upper", sub: "Volumen + cardio &middot; 6 bloques",
-    note: "Termina con 12-15 min de intervalos en bici o remo (30s fuerte / 90s suave x8).",
+    title: "Dia 3 &middot; Upper B", sub: "Volumen + cardio &middot; 9 ejercicios",
+    note: "Superseries: 1+2, 3+4, 5+6, 7+8. Termina con 10-12 min de bici o remo (30s fuerte / 90s suave), a intensidad moderada por ahora.",
     exercises: [
       { id: "d3-e1", name: "Press militar mancuernas", target: "3x8-10", type: "sets" },
       { id: "d3-e2", name: "Remo unilateral", target: "3x10 por lado", type: "sets" },
@@ -1293,8 +1302,8 @@ const ROUTINE = [
   },
   {
     id: "d4", badge: "lower", emoji: "&#129461;",
-    title: "Dia 4 &middot; Lower", sub: "Fuerza &middot; 5 ejercicios",
-    note: "5 min calentamiento lateral antes &middot; 5 min movilidad cadera/tobillo al final.",
+    title: "Dia 4 &middot; Lower B", sub: "Fuerza &middot; 6 ejercicios",
+    note: "5 min calentamiento lateral antes. Swing explosivo. Descansa 2-3 min en peso muerto. Superserie 5+6. 5 min movilidad cadera/tobillo al final.",
     exercises: [
       { id: "d4-e1", name: "Peso muerto convencional o sumo", target: "4x5-6", type: "sets" },
       { id: "d4-e2", name: "Sentadilla bulgara", target: "3x8-10 por pierna", type: "sets" },
@@ -1310,7 +1319,7 @@ let LIVE_DAYS = BASE_ROUTINE;
 let EXERCISE_INDEX = {};
 let DAY_OF_EXERCISE = {};
 let customExercisesByDay = {}; // dayId -> [exercise defs] discovered from Supabase
-let settingsCache = { restByDay: { d1: 90, d2: 90, d3: 60, d4: 90 }, orderByDay: {} };
+let settingsCache = { restByDay: { d1: 60, d2: 120, d3: 60, d4: 120 }, orderByDay: {} };
 
 // "Tambien esta semana" — logged the same way as a day, but not part of the
 // 4-day routine (no progress bar target that matters, no archiving)
@@ -1449,6 +1458,7 @@ async function initDb() {
 async function startApp() {
   hideAuthScreen();
   await loadAll();
+  try { await migrateToRoutineV2(); } catch (e) { console.error("Error cargando la rutina nueva:", e); }
   try {
     const pending = JSON.parse(localStorage.getItem("pendingSettings") || "null");
     if (pending && Array.isArray(pending.workouts)) {
@@ -1460,6 +1470,7 @@ async function startApp() {
   renderCalendar();
   refreshAllSummaries();
   refreshOpenExercisePanel();
+  try { showRoutineV2Summary(); } catch (e) {}
 }
 
 const BASE_IDS = new Set();
@@ -1486,7 +1497,7 @@ async function loadAll() {
 
   // settings row (rest timer durations, etc.)
   if (byId["__settings__"] && byId["__settings__"].meta) {
-    settingsCache = Object.assign({ restByDay: { d1: 90, d2: 90, d3: 60, d4: 90 }, orderByDay: {} }, byId["__settings__"].meta);
+    settingsCache = Object.assign({ restByDay: { d1: 60, d2: 120, d3: 60, d4: 120 }, orderByDay: {} }, byId["__settings__"].meta);
   }
 
   bodyEntries = Object.keys(byId).filter(id => id.indexOf("__body__") === 0)
@@ -1519,6 +1530,240 @@ async function loadAll() {
   });
 
   rebuildLiveRoutine();
+}
+
+// ---------- Rutina v2 (oct 2026): Upper A / Lower A / Upper B / Lower B ----------
+// Se aplica una sola vez por cuenta. Reutiliza los ejercicios que ya existen
+// (por id y por nombre) para que conserven todo su historial, crea solo los que
+// faltan y archiva (nunca borra) los que ya no estan en la rutina.
+const ROUTINE_V2 = {
+  version: 2,
+  days: {
+    d1: ["pressBanca", "remoBarra", "pressInclinado", "jalon", "laterales", "facePull", "curlInclinado", "tricepsPolea"],
+    d2: ["sentadilla", "rumano", "zancada", "pallof", "farmer"],
+    d3: ["pressMilitar", "dominadas", "pressMaquina", "remoUnilateral", "laterales", "facePull", "curlMartillo", "pressFrances", "cardio"],
+    d4: ["swing", "pesoMuerto", "bulgara", "curlFemoral", "woodchop", "suitcase"]
+  },
+  // m: comprueba si un nombre (normalizado) es este mismo ejercicio
+  ex: {
+    pressBanca:     { name: "Press banca mancuernas (neutro)", target: "4x6-8", type: "sets", zone: "upper", pattern: "push", def: "d1-e1",
+                      m: n => /press/.test(n) && /banca|plano/.test(n) && !/inclin|angulo|maquina/.test(n) },
+    remoBarra:      { name: "Remo con barra o maquina", target: "4x6-8", type: "sets", zone: "upper", pattern: "pull", def: "d1-e2",
+                      m: n => /\bremo\b/.test(n) && !/unilateral|una mano|mancuerna|bici|cardio/.test(n) },
+    pressInclinado: { name: "Press inclinado mancuerna", target: "3x8-10", type: "sets", zone: "upper", pattern: "push", def: "d1-e3",
+                      m: n => /press/.test(n) && /inclin|angulo/.test(n) },
+    jalon:          { name: "Jalon al pecho", target: "3x8-10", type: "sets", zone: "upper", pattern: "pull", def: "d1-e4",
+                      m: n => /jalon/.test(n) && !/neutro/.test(n) },
+    dominadas:      { name: "Dominadas o jalon agarre neutro", target: "3x8-10", type: "sets", zone: "upper", pattern: "pull", def: null,
+                      m: n => /dominad|pull up|chin up/.test(n) || (/jalon/.test(n) && /neutro/.test(n)) },
+    laterales:      { name: "Elevaciones laterales", target: "3x12-15", type: "sets", zone: "upper", pattern: "push", def: "d3-e3",
+                      m: n => /lateral/.test(n) && /elevac|raise/.test(n) },
+    facePull:       { name: "Face pull", target: "3x12-15", type: "sets", zone: "upper", pattern: "pull", def: "d1-e5",
+                      m: n => /face ?pull/.test(n) },
+    curlInclinado:  { name: "Curl inclinado mancuerna", target: "3x10-12", type: "sets", zone: "upper", pattern: "pull", def: "d3-e4",
+                      m: n => /curl/.test(n) && !/martillo|hammer|femoral|pierna|isquio/.test(n) },
+    tricepsPolea:   { name: "Extension triceps polea", target: "3x10-12", type: "sets", zone: "upper", pattern: "push", def: "d3-e5",
+                      m: n => /tricep/.test(n) && !/frances|skull/.test(n) },
+    pressMilitar:   { name: "Press militar mancuerna o landmine", target: "3x8-10", type: "sets", zone: "upper", pattern: "push", def: "d3-e1",
+                      m: n => /press/.test(n) && /militar|landmine|hombro|overhead|arnold/.test(n) },
+    pressMaquina:   { name: "Press pecho maquina o cruces polea", target: "3x10-12", type: "sets", zone: "upper", pattern: "push", def: null,
+                      m: n => (/press/.test(n) && /maquina/.test(n) && /pecho|chest/.test(n)) || /cruce|apertura|\bfly\b|contractora|pec deck/.test(n) },
+    remoUnilateral: { name: "Remo unilateral mancuerna", target: "3x10 por lado", type: "sets", zone: "upper", pattern: "pull", def: "d3-e2",
+                      m: n => /\bremo\b/.test(n) && /unilateral|una mano|mancuerna/.test(n) },
+    curlMartillo:   { name: "Curl martillo", target: "2x10-12", type: "sets", zone: "upper", pattern: "pull", def: null,
+                      m: n => /martillo|hammer/.test(n) },
+    pressFrances:   { name: "Press frances mancuernas", target: "2x10-12", type: "sets", zone: "upper", pattern: "push", def: null,
+                      m: n => /frances|skull/.test(n) },
+    cardio:         { name: "Finisher: bici o remo (intervalos)", target: "10-12 min", type: "cardio", zone: "core", pattern: "", def: "d3-e6",
+                      m: n => /bici|remo|cardio|finisher|interval|bike|row/.test(n) },
+    sentadilla:     { name: "Sentadilla o prensa", target: "4x5-8", type: "sets", zone: "lower", pattern: "push", def: "d2-e1",
+                      m: n => /sentadilla|prensa|squat/.test(n) && !/bulgara|split/.test(n) },
+    rumano:         { name: "Peso muerto rumano", target: "3x8-10", type: "sets", zone: "lower", pattern: "pull", def: "d2-e2",
+                      m: n => /rumano|\brdl\b/.test(n) },
+    zancada:        { name: "Zancada atras", target: "3x8-10 por pierna", type: "sets", zone: "lower", pattern: "push", def: "d2-e3",
+                      m: n => /zancada|step|lunge/.test(n) },
+    pallof:         { name: "Pallof press", target: "3x10", type: "sets", zone: "core", pattern: "", def: "d2-e5",
+                      m: n => /pallof/.test(n) },
+    farmer:         { name: "Farmer walk", target: "3x30-40m", type: "carry", zone: "core", pattern: "", def: "d2-e4",
+                      m: n => /farmer|granjero/.test(n) },
+    swing:          { name: "Kettlebell swing", target: "3x10", type: "sets", zone: "lower", pattern: "pull", def: null,
+                      m: n => /swing|kettlebell|pesa rusa/.test(n) },
+    pesoMuerto:     { name: "Peso muerto o trap bar", target: "4x4-6", type: "sets", zone: "lower", pattern: "pull", def: "d4-e1",
+                      m: n => /peso muerto|deadlift|trap bar/.test(n) && !/rumano|\brdl\b/.test(n) },
+    bulgara:        { name: "Sentadilla bulgara", target: "3x8-10 por pierna", type: "sets", zone: "lower", pattern: "push", def: "d4-e2",
+                      m: n => /bulgara|split squat/.test(n) },
+    curlFemoral:    { name: "Curl femoral", target: "3x10-12", type: "sets", zone: "lower", pattern: "pull", def: null,
+                      m: n => /femoral|isquio|leg curl|curl pierna/.test(n) },
+    woodchop:       { name: "Woodchop en polea", target: "3x10 por lado", type: "sets", zone: "core", pattern: "", def: "d4-e5",
+                      m: n => /woodchop|wood chop|lenador/.test(n) },
+    suitcase:       { name: "Suitcase carry", target: "3x30m por lado", type: "carry", zone: "core", pattern: "", def: "d4-e4",
+                      m: n => /suitcase|maleta/.test(n) }
+  },
+  oldRest: { d1: 90, d2: 90, d3: 60, d4: 90 },
+  newRest: { d1: 60, d2: 120, d3: 60, d4: 120 }
+};
+
+function normName(t) {
+  return String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, " ").trim();
+}
+function historyCount(id) { return ((cache[id] && cache[id].history) || []).length; }
+
+// Decide que ejercicio existente ocupa cada hueco de la rutina nueva.
+// Devuelve { assign: key -> id | null } sin tocar nada.
+function planRoutineV2() {
+  const R = ROUTINE_V2;
+  const keys = Object.keys(R.ex);
+  const lib = libraryIds();
+  const used = new Set();
+  const assign = {};
+  const fits = (id, spec) => {
+    const d = defOf(id);
+    return !!d && (d.type || "sets") === spec.type && spec.m(normName(displayName(id)));
+  };
+  // 1) el ejercicio "de siempre" de ese hueco, si sigue siendo lo mismo
+  keys.forEach(k => {
+    const spec = R.ex[k];
+    if (spec.def && lib.indexOf(spec.def) >= 0 && !used.has(spec.def) && fits(spec.def, spec)) {
+      assign[k] = spec.def; used.add(spec.def);
+    }
+  });
+  // 2) cualquier otro ejercicio (tambien archivados o creados por ti) con el mismo nombre;
+  //    si hay varios, el que tenga mas registros
+  keys.forEach(k => {
+    if (assign[k]) return;
+    const spec = R.ex[k];
+    const cands = lib.filter(id => !used.has(id) && fits(id, spec))
+      .sort((a, b) => (historyCount(b) - historyCount(a)) || ((isArchived(a) ? 1 : 0) - (isArchived(b) ? 1 : 0)) || a.localeCompare(b));
+    if (cands.length) { assign[k] = cands[0]; used.add(cands[0]); }
+    else assign[k] = null;
+  });
+  return assign;
+}
+
+async function migrateToRoutineV2() {
+  if (!supabaseClient || !currentUser) return;
+  if (settingsCache.routineVersion >= ROUTINE_V2.version) return;
+  const R = ROUTINE_V2;
+  const assign = planRoutineV2();
+
+  // lo que habia antes en los dias (para archivar lo que sobre y poder deshacer)
+  const oldPlan = {};
+  LIVE_DAYS.forEach(d => { oldPlan[d.id] = d.exercises.map(e => e.id); });
+  const oldInDays = new Set([].concat(...Object.values(oldPlan)));
+
+  const changed = new Set();
+  const report = { reused: [], created: [], archived: [] };
+  // copia para dejarlo todo como estaba si no se puede guardar
+  const snapshot = {};
+  Object.keys(cache).forEach(id => { snapshot[id] = JSON.stringify(cache[id]); });
+
+  // los registros antiguos sin dia apuntado se quedan con el dia en que se hicieron,
+  // para que al compartir ejercicio entre dos dias no se mezclen las sesiones
+  Object.keys(cache).forEach(id => {
+    const st = STATIC_DAY_OF_EXERCISE[id];
+    if (!st || !BASE_IDS.has(id)) return;
+    (cache[id].history || []).forEach(e => { if (e && !e.dayId) { e.dayId = st.id; changed.add(id); } });
+  });
+
+  Object.keys(R.ex).forEach(k => {
+    const spec = R.ex[k];
+    let id = assign[k];
+    if (!id) {
+      id = "custom-r2-" + k.toLowerCase();
+      cache[id] = cache[id] || emptyDoc();
+      cache[id].meta = Object.assign({}, cache[id].meta, { isCustom: true, type: spec.type });
+      report.created.push(k);
+      assign[k] = id;
+    } else {
+      report.reused.push(k);
+    }
+    const c = cache[id];
+    const before = JSON.stringify([c.customName, c.meta]);
+    const meta = Object.assign({}, c.meta || {});
+    if (!meta.r2prev && !(meta.isCustom && id.indexOf("custom-r2-") === 0)) {
+      const d = defOf(id);
+      meta.r2prev = { name: displayName(id), target: d ? d.target : "", zone: meta.zone || null, pattern: meta.pattern !== undefined ? meta.pattern : null, active: meta.active !== false };
+    }
+    const base = BASE_DEFS[id];
+    // si el nombre lo habias puesto tu, se respeta; si era el de serie, pasa al de la rutina nueva
+    const ownName = report.created.indexOf(k) < 0 && (base ? !!c.customName && c.customName !== base.name : !!c.customName);
+    if (!ownName) c.customName = (base && base.name === spec.name) ? "" : spec.name;
+    if (base && base.target === spec.target) delete meta.target; else meta.target = spec.target;
+    meta.zone = spec.zone;
+    meta.pattern = spec.pattern;
+    meta.active = true;
+    c.meta = meta;
+    if (JSON.stringify([c.customName, c.meta]) !== before) changed.add(id);
+  });
+
+  // lo que estaba en algun dia y ya no entra: archivado, con su historial intacto
+  const newIds = new Set(Object.values(assign));
+  oldInDays.forEach(id => {
+    if (newIds.has(id) || !cache[id]) return;
+    const meta = Object.assign({}, cache[id].meta || {});
+    if (!meta.r2prev) meta.r2prev = { name: displayName(id), active: meta.active !== false };
+    meta.active = false;
+    cache[id].meta = meta;
+    changed.add(id);
+    report.archived.push(id);
+  });
+
+  // primero los ejercicios; si alguno falla, no se toca la rutina y se reintenta al volver a abrir
+  const ids = Array.from(changed);
+  const results = await Promise.all(ids.map(id => persist(id, true)));
+  if (results.some(ok => !ok)) {
+    Object.keys(cache).forEach(id => { if (snapshot[id]) cache[id] = JSON.parse(snapshot[id]); else delete cache[id]; });
+    rebuildLiveRoutine();
+    showToast("No se pudo cargar la rutina nueva. Se reintentara al abrir la app");
+    return;
+  }
+
+  const prevSettings = { dayPlan: oldPlan, restByDay: Object.assign({}, settingsCache.restByDay), orderByDay: settingsCache.orderByDay || {} };
+  const plan = {};
+  Object.keys(R.days).forEach(d => { plan[d] = R.days[d].map(k => assign[k]); });
+  const rest = Object.assign({}, settingsCache.restByDay || {});
+  Object.keys(R.newRest).forEach(d => { if (rest[d] === undefined || rest[d] === R.oldRest[d]) rest[d] = R.newRest[d]; });
+  settingsCache.dayPlan = plan;
+  settingsCache.restByDay = rest;
+  settingsCache.routineVersion = R.version;
+  settingsCache.routineV2 = {
+    at: Date.now(), seen: false, prev: prevSettings,
+    reused: report.reused.map(k => assign[k]), created: report.created.map(k => assign[k]), archived: report.archived
+  };
+  const ok = await persistSettings();
+  rebuildLiveRoutine();
+  if (ok) showRoutineV2Summary();
+}
+
+function showRoutineV2Summary() {
+  const info = settingsCache.routineV2;
+  if (!info || info.seen) return;
+  const created = new Set(info.created || []);
+  const row = id => {
+    const n = historyCount(id);
+    const tag = created.has(id) ? `<span class="r2-tag new">Nuevo</span>`
+      : `<span class="r2-tag kept">${n ? n + (n === 1 ? " registro" : " registros") : "Sin registros"}</span>`;
+    return `<div class="r2-row"><span>${esc(displayName(id))}</span>${tag}</div>`;
+  };
+  const days = LIVE_DAYS.map(d => `<div class="r2-day ${d.badge}">${plain(d.title)}</div>` + d.exercises.map(e => row(e.id)).join("")).join("");
+  const arch = (info.archived || []).map(id => { const n = historyCount(id);
+    return `<div class="r2-row"><span>${esc(displayName(id))}</span><span class="r2-tag kept">${n} ${n === 1 ? "registro" : "registros"}</span></div>`; }).join("");
+  const sheet = openSheet(`
+    <div class="sheet-title">Rutina nueva cargada</div>
+    <div class="sheet-hint">Los ejercicios que ya tenias siguen con todos sus pesos. Solo se han creado los que faltaban.</div>
+    <div class="r2-list">${days}
+      ${arch ? `<div class="r2-day">Archivados (historial conservado)</div>${arch}` : ""}
+    </div>
+    <button class="sheet-primary" type="button" id="r2Ok">Entendido</button>`);
+  const markSeen = () => {
+    if (!settingsCache.routineV2 || settingsCache.routineV2.seen) return;
+    settingsCache.routineV2.seen = true;
+    persistSettings();
+  };
+  sheet.querySelector("#r2Ok").addEventListener("click", () => { markSeen(); closeSheet(); });
+  const ov = sheet.closest(".sheet-overlay");
+  if (ov) ov.addEventListener("click", e => { if (e.target === ov) markSeen(); });
 }
 
 async function persist(exId, quiet) {
