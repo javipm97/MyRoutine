@@ -1265,8 +1265,8 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 const ROUTINE = [
   {
     id: "d1", badge: "upper", emoji: "&#128170;",
-    title: "Día 1 &middot; Upper A", sub: "Pecho y espalda &middot; 8 ejercicios",
-    note: "Superseries: 1+2, 3+4, 5+6, 7+8. Haces uno, ~60s, el otro, ~60s, y repites. Si vas justo de tiempo, quita 7+8. Si el press molesta en el hombro, cambia a máquina o agarre neutro.",
+    title: "Dia 1 &middot; Upper A", sub: "Fuerza &middot; 8 ejercicios",
+    note: "Superseries: 1+2, 3+4, 5+6, 7+8. Haces uno, ~60s, el otro, ~60s, y repites. Si vas justo de tiempo, quita 7+8.",
     exercises: [
       { id: "d1-e1", name: "Press banca mancuernas (neutro)", target: "4x6-8", type: "sets" },
       { id: "d1-e2", name: "Remo con barra o maquina", target: "4x8-10", type: "sets" },
@@ -1277,8 +1277,8 @@ const ROUTINE = [
   },
   {
     id: "d2", badge: "lower", emoji: "&#129461;",
-    title: "Día 2 &middot; Lower", sub: "Pierna completa &middot; 5 ejercicios",
-    note: "Único día de pierna: que sea intenso. 5 min de calentamiento antes. Descansa 2-3 min en sentadilla y rumano. Superserie 4+5. Unos 40 min.",
+    title: "Dia 2 &middot; Lower A", sub: "Fuerza &middot; 5 ejercicios",
+    note: "5 min calentamiento lateral antes. Descansa 2-3 min en sentadilla y rumano. Superserie 4+5. 5 min movilidad cadera/tobillo al final.",
     exercises: [
       { id: "d2-e1", name: "Sentadilla o prensa", target: "4x6-8", type: "sets" },
       { id: "d2-e2", name: "Peso muerto rumano", target: "3x8-10", type: "sets" },
@@ -1289,8 +1289,8 @@ const ROUTINE = [
   },
   {
     id: "d3", badge: "upper", emoji: "&#128170;",
-    title: "Día 3 &middot; Upper B", sub: "Espalda y hombro + cardio &middot; 8 ejercicios",
-    note: "Superseries: 1+2, 3+4, 5+6. Nada de press militar con barra. Termina con 10-12 min de bici o remo (30s fuerte / 90s suave), a intensidad moderada por ahora.",
+    title: "Dia 3 &middot; Upper B", sub: "Volumen + cardio &middot; 9 ejercicios",
+    note: "Superseries: 1+2, 3+4, 5+6, 7+8. Termina con 10-12 min de bici o remo (30s fuerte / 90s suave), a intensidad moderada por ahora.",
     exercises: [
       { id: "d3-e1", name: "Press militar mancuernas", target: "3x8-10", type: "sets" },
       { id: "d3-e2", name: "Remo unilateral", target: "3x10 por lado", type: "sets" },
@@ -1301,9 +1301,9 @@ const ROUTINE = [
     ]
   },
   {
-    id: "d4", badge: "upper", emoji: "&#128170;",
-    title: "Día 4 &middot; Upper C", sub: "Estética: hombro, pecho y brazo &middot; 7 ejercicios",
-    note: "Día de accesorios, no otro día de press pesado. Superseries: 2+3, 4+5, 6+7. Laterales con poco descanso.",
+    id: "d4", badge: "lower", emoji: "&#129461;",
+    title: "Dia 4 &middot; Lower B", sub: "Fuerza &middot; 6 ejercicios",
+    note: "5 min calentamiento lateral antes. Swing explosivo. Descansa 2-3 min en peso muerto. Superserie 5+6. 5 min movilidad cadera/tobillo al final.",
     exercises: [
       { id: "d4-e1", name: "Peso muerto convencional o sumo", target: "4x5-6", type: "sets" },
       { id: "d4-e2", name: "Sentadilla bulgara", target: "3x8-10 por pierna", type: "sets" },
@@ -1319,7 +1319,7 @@ let LIVE_DAYS = BASE_ROUTINE;
 let EXERCISE_INDEX = {};
 let DAY_OF_EXERCISE = {};
 let customExercisesByDay = {}; // dayId -> [exercise defs] discovered from Supabase
-let settingsCache = { restByDay: { d1: 60, d2: 120, d3: 60, d4: 60 }, orderByDay: {} };
+let settingsCache = { restByDay: { d1: 60, d2: 120, d3: 60, d4: 120 }, orderByDay: {} };
 
 // "Tambien esta semana" — logged the same way as a day, but not part of the
 // 4-day routine (no progress bar target that matters, no archiving)
@@ -1497,7 +1497,7 @@ async function loadAll() {
 
   // settings row (rest timer durations, etc.)
   if (byId["__settings__"] && byId["__settings__"].meta) {
-    settingsCache = Object.assign({ restByDay: { d1: 60, d2: 120, d3: 60, d4: 60 }, orderByDay: {} }, byId["__settings__"].meta);
+    settingsCache = Object.assign({ restByDay: { d1: 60, d2: 120, d3: 60, d4: 120 }, orderByDay: {} }, byId["__settings__"].meta);
   }
 
   bodyEntries = Object.keys(byId).filter(id => id.indexOf("__body__") === 0)
@@ -1532,76 +1532,76 @@ async function loadAll() {
   rebuildLiveRoutine();
 }
 
-// ---------- Rutina v3 (oct 2026): Upper A / Lower / Upper B / Upper C ----------
-// (v2 era Upper A / Lower A / Upper B / Lower B.)
+// ---------- Rutina v2 (oct 2026): Upper A / Lower A / Upper B / Lower B ----------
 // Se aplica una sola vez por cuenta. Reutiliza los ejercicios que ya existen
 // (por id y por nombre) para que conserven todo su historial, crea solo los que
 // faltan y archiva (nunca borra) los que ya no estan en la rutina.
-// El orden de "ex" importa: los primeros eligen antes cuando dos nombres encajan.
 const ROUTINE_V2 = {
-  version: 3,
+  version: 2,
   days: {
-    d1: ["pressInclinado", "remoBarra", "aperturas", "jalon", "laterales", "facePull", "curlInclinado", "tricepsPolea"],
-    d2: ["sentadilla", "rumano", "bulgara", "curlFemoral", "gemelo"],
-    d3: ["dominadas", "pressMilitar", "remoPolea", "laterales", "facePull", "curlMartillo", "pressFrances", "cardio"],
-    d4: ["laterales", "pressMaquina", "pullover", "facePull", "curlBarra", "tricepsCabeza", "pallof"]
+    d1: ["pressBanca", "remoBarra", "pressInclinado", "jalon", "laterales", "facePull", "curlInclinado", "tricepsPolea"],
+    d2: ["sentadilla", "rumano", "zancada", "pallof", "farmer"],
+    d3: ["pressMilitar", "dominadas", "pressMaquina", "remoUnilateral", "laterales", "facePull", "curlMartillo", "pressFrances", "cardio"],
+    d4: ["swing", "pesoMuerto", "bulgara", "curlFemoral", "woodchop", "suitcase"]
   },
   // m: comprueba si un nombre (normalizado) es este mismo ejercicio
   ex: {
-    pressInclinado: { name: "Press inclinado mancuerna", target: "4x6-8", type: "sets", zone: "upper", pattern: "push", def: "d1-e3",
-                      m: n => /press/.test(n) && /inclin|angulo/.test(n) },
+    pressBanca:     { name: "Press banca mancuernas (neutro)", target: "4x6-8", type: "sets", zone: "upper", pattern: "push", def: "d1-e1",
+                      m: n => /press/.test(n) && /banca|plano/.test(n) && !/inclin|angulo|maquina/.test(n) },
     remoBarra:      { name: "Remo con barra o maquina", target: "4x6-8", type: "sets", zone: "upper", pattern: "pull", def: "d1-e2",
-                      m: n => /\bremo\b/.test(n) && !/unilateral|una mano|mancuerna|bici|cardio|polea|sentado|gironda|cable/.test(n) },
-    pressMaquina:   { name: "Press pecho maquina o cruces polea", target: "3x10-12", type: "sets", zone: "upper", pattern: "push", def: null,
-                      m: n => /press/.test(n) && /maquina/.test(n) && /pecho|chest/.test(n) },
-    aperturas:      { name: "Aperturas en polea", target: "3x12-15", type: "sets", zone: "upper", pattern: "push", def: null,
-                      m: n => !/press/.test(n) && /cruce|apertura|\bfly\b|contractora|pec deck/.test(n) },
+                      m: n => /\bremo\b/.test(n) && !/unilateral|una mano|mancuerna|bici|cardio/.test(n) },
+    pressInclinado: { name: "Press inclinado mancuerna", target: "3x8-10", type: "sets", zone: "upper", pattern: "push", def: "d1-e3",
+                      m: n => /press/.test(n) && /inclin|angulo/.test(n) },
     jalon:          { name: "Jalon al pecho", target: "3x8-10", type: "sets", zone: "upper", pattern: "pull", def: "d1-e4",
                       m: n => /jalon/.test(n) && !/neutro/.test(n) },
-    dominadas:      { name: "Dominadas o jalon agarre neutro", target: "4x6-10", type: "sets", zone: "upper", pattern: "pull", def: null,
+    dominadas:      { name: "Dominadas o jalon agarre neutro", target: "3x8-10", type: "sets", zone: "upper", pattern: "pull", def: null,
                       m: n => /dominad|pull up|chin up/.test(n) || (/jalon/.test(n) && /neutro/.test(n)) },
     laterales:      { name: "Elevaciones laterales", target: "3x12-15", type: "sets", zone: "upper", pattern: "push", def: "d3-e3",
                       m: n => /lateral/.test(n) && /elevac|raise/.test(n) },
     facePull:       { name: "Face pull", target: "3x12-15", type: "sets", zone: "upper", pattern: "pull", def: "d1-e5",
                       m: n => /face ?pull/.test(n) },
     curlInclinado:  { name: "Curl inclinado mancuerna", target: "3x10-12", type: "sets", zone: "upper", pattern: "pull", def: "d3-e4",
-                      m: n => /curl/.test(n) && !/martillo|hammer|femoral|pierna|isquio|barra|\bz\b/.test(n) },
+                      m: n => /curl/.test(n) && !/martillo|hammer|femoral|pierna|isquio/.test(n) },
     tricepsPolea:   { name: "Extension triceps polea", target: "3x10-12", type: "sets", zone: "upper", pattern: "push", def: "d3-e5",
-                      m: n => /tricep/.test(n) && !/frances|skull|cabeza|overhead|nuca/.test(n) },
-    pressMilitar:   { name: "Press hombro maquina o mancuerna neutro", target: "3x8-10", type: "sets", zone: "upper", pattern: "push", def: "d3-e1",
+                      m: n => /tricep/.test(n) && !/frances|skull/.test(n) },
+    pressMilitar:   { name: "Press militar mancuerna o landmine", target: "3x8-10", type: "sets", zone: "upper", pattern: "push", def: "d3-e1",
                       m: n => /press/.test(n) && /militar|landmine|hombro|overhead|arnold/.test(n) },
-    remoPolea:      { name: "Remo en polea sentado", target: "3x10-12", type: "sets", zone: "upper", pattern: "pull", def: null,
-                      m: n => /\bremo\b/.test(n) && /polea|sentado|gironda|cable/.test(n) },
+    pressMaquina:   { name: "Press pecho maquina o cruces polea", target: "3x10-12", type: "sets", zone: "upper", pattern: "push", def: null,
+                      m: n => (/press/.test(n) && /maquina/.test(n) && /pecho|chest/.test(n)) || /cruce|apertura|\bfly\b|contractora|pec deck/.test(n) },
+    remoUnilateral: { name: "Remo unilateral mancuerna", target: "3x10 por lado", type: "sets", zone: "upper", pattern: "pull", def: "d3-e2",
+                      m: n => /\bremo\b/.test(n) && /unilateral|una mano|mancuerna/.test(n) },
     curlMartillo:   { name: "Curl martillo", target: "2x10-12", type: "sets", zone: "upper", pattern: "pull", def: null,
                       m: n => /martillo|hammer/.test(n) },
     pressFrances:   { name: "Press frances mancuernas", target: "2x10-12", type: "sets", zone: "upper", pattern: "push", def: null,
                       m: n => /frances|skull/.test(n) },
     cardio:         { name: "Finisher: bici o remo (intervalos)", target: "10-12 min", type: "cardio", zone: "core", pattern: "", def: "d3-e6",
                       m: n => /bici|remo|cardio|finisher|interval|bike|row/.test(n) },
-    pullover:       { name: "Pullover en polea", target: "3x12-15", type: "sets", zone: "upper", pattern: "pull", def: null,
-                      m: n => /pullover|pull over/.test(n) },
-    curlBarra:      { name: "Curl con barra Z", target: "3x8-10", type: "sets", zone: "upper", pattern: "pull", def: null,
-                      m: n => /curl/.test(n) && /barra|\bz\b/.test(n) && !/femoral|pierna/.test(n) },
-    tricepsCabeza:  { name: "Extension triceps sobre la cabeza (polea)", target: "3x10-12", type: "sets", zone: "upper", pattern: "push", def: null,
-                      m: n => /tricep/.test(n) && /cabeza|overhead|nuca/.test(n) },
-    sentadilla:     { name: "Sentadilla o prensa", target: "4x6-8", type: "sets", zone: "lower", pattern: "push", def: "d2-e1",
+    sentadilla:     { name: "Sentadilla o prensa", target: "4x5-8", type: "sets", zone: "lower", pattern: "push", def: "d2-e1",
                       m: n => /sentadilla|prensa|squat/.test(n) && !/bulgara|split/.test(n) },
     rumano:         { name: "Peso muerto rumano", target: "3x8-10", type: "sets", zone: "lower", pattern: "pull", def: "d2-e2",
                       m: n => /rumano|\brdl\b/.test(n) },
+    zancada:        { name: "Zancada atras", target: "3x8-10 por pierna", type: "sets", zone: "lower", pattern: "push", def: "d2-e3",
+                      m: n => /zancada|step|lunge/.test(n) },
+    pallof:         { name: "Pallof press", target: "3x10", type: "sets", zone: "core", pattern: "", def: "d2-e5",
+                      m: n => /pallof/.test(n) },
+    farmer:         { name: "Farmer walk", target: "3x30-40m", type: "carry", zone: "core", pattern: "", def: "d2-e4",
+                      m: n => /farmer|granjero/.test(n) },
+    swing:          { name: "Kettlebell swing", target: "3x10", type: "sets", zone: "lower", pattern: "pull", def: null,
+                      m: n => /swing|kettlebell|pesa rusa/.test(n) },
+    pesoMuerto:     { name: "Peso muerto o trap bar", target: "4x4-6", type: "sets", zone: "lower", pattern: "pull", def: "d4-e1",
+                      m: n => /peso muerto|deadlift|trap bar/.test(n) && !/rumano|\brdl\b/.test(n) },
     bulgara:        { name: "Sentadilla bulgara", target: "3x8-10 por pierna", type: "sets", zone: "lower", pattern: "push", def: "d4-e2",
                       m: n => /bulgara|split squat/.test(n) },
     curlFemoral:    { name: "Curl femoral", target: "3x10-12", type: "sets", zone: "lower", pattern: "pull", def: null,
                       m: n => /femoral|isquio|leg curl|curl pierna/.test(n) },
-    gemelo:         { name: "Gemelo de pie o en prensa", target: "3x12-15", type: "sets", zone: "lower", pattern: "push", def: null,
-                      m: n => /gemelo|calf|pantorrilla/.test(n) },
-    pallof:         { name: "Pallof press", target: "3x10", type: "sets", zone: "core", pattern: "", def: "d2-e5",
-                      m: n => /pallof/.test(n) }
+    woodchop:       { name: "Woodchop en polea", target: "3x10 por lado", type: "sets", zone: "core", pattern: "", def: "d4-e5",
+                      m: n => /woodchop|wood chop|lenador/.test(n) },
+    suitcase:       { name: "Suitcase carry", target: "3x30m por lado", type: "carry", zone: "core", pattern: "", def: "d4-e4",
+                      m: n => /suitcase|maleta/.test(n) }
   },
-  oldRest: { d1: 60, d2: 120, d3: 60, d4: 120 },
-  newRest: { d1: 60, d2: 120, d3: 60, d4: 60 }
+  oldRest: { d1: 90, d2: 90, d3: 60, d4: 90 },
+  newRest: { d1: 60, d2: 120, d3: 60, d4: 120 }
 };
-// Hasta este dia, el Dia 4 era Lower B: asi el calendario lo sigue pintando como pierna
-const D4_LOWER_UNTIL = "2026-10-19";
 
 function normName(t) {
   return String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
@@ -1918,8 +1918,6 @@ calRef.setDate(1);
 function dayForEntry(exId, entry) {
   if (entry && entry.dayId) {
     const d = BASE_ROUTINE.concat(EXTRA_DAYS).find(x => x.id === entry.dayId);
-    if (d && d.id === "d4" && typeof entry.dateKey === "string" && entry.dateKey < D4_LOWER_UNTIL)
-      return Object.assign({}, d, { badge: "lower", title: "Día 4 &middot; Lower B" });
     if (d) return d;
   }
   return STATIC_DAY_OF_EXERCISE[exId] || null;
