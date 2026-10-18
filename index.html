@@ -1536,8 +1536,9 @@ async function loadAll() {
 // Se aplica una sola vez por cuenta. Reutiliza los ejercicios que ya existen
 // (por id y por nombre) para que conserven todo su historial, crea solo los que
 // faltan y archiva (nunca borra) los que ya no estan en la rutina.
+// v4 (18 oct 2026): vuelve a la v2 tras probar 3 torso + 1 pierna (v3).
 const ROUTINE_V2 = {
-  version: 2,
+  version: 4,
   days: {
     d1: ["pressBanca", "remoBarra", "pressInclinado", "jalon", "laterales", "facePull", "curlInclinado", "tricepsPolea"],
     d2: ["sentadilla", "rumano", "zancada", "pallof", "farmer"],
@@ -1567,7 +1568,7 @@ const ROUTINE_V2 = {
     pressMilitar:   { name: "Press militar mancuerna o landmine", target: "3x8-10", type: "sets", zone: "upper", pattern: "push", def: "d3-e1",
                       m: n => /press/.test(n) && /militar|landmine|hombro|overhead|arnold/.test(n) },
     pressMaquina:   { name: "Press pecho maquina o cruces polea", target: "3x10-12", type: "sets", zone: "upper", pattern: "push", def: null,
-                      m: n => (/press/.test(n) && /maquina/.test(n) && /pecho|chest/.test(n)) || /cruce|apertura|\bfly\b|contractora|pec deck/.test(n) },
+                      m: n => n !== "aperturas en polea" && ((/press/.test(n) && /maquina/.test(n) && /pecho|chest/.test(n)) || /cruce|apertura|\bfly\b|contractora|pec deck/.test(n)) },
     remoUnilateral: { name: "Remo unilateral mancuerna", target: "3x10 por lado", type: "sets", zone: "upper", pattern: "pull", def: "d3-e2",
                       m: n => /\bremo\b/.test(n) && /unilateral|una mano|mancuerna/.test(n) },
     curlMartillo:   { name: "Curl martillo", target: "2x10-12", type: "sets", zone: "upper", pattern: "pull", def: null,
@@ -1599,9 +1600,13 @@ const ROUTINE_V2 = {
     suitcase:       { name: "Suitcase carry", target: "3x30m por lado", type: "carry", zone: "core", pattern: "", def: "d4-e4",
                       m: n => /suitcase|maleta/.test(n) }
   },
-  oldRest: { d1: 90, d2: 90, d3: 60, d4: 90 },
+  oldRest: { d1: 60, d2: 120, d3: 60, d4: 60 },
   newRest: { d1: 60, d2: 120, d3: 60, d4: 120 }
 };
+
+// nombres que puso la rutina v3: no cuentan como nombre elegido por ti
+const AUTO_NAMES_V3 = new Set(["Press hombro maquina o mancuerna neutro", "Aperturas en polea", "Remo en polea sentado",
+  "Pullover en polea", "Curl con barra Z", "Extension triceps sobre la cabeza (polea)", "Gemelo de pie o en prensa"]);
 
 function normName(t) {
   return String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
@@ -1687,7 +1692,7 @@ async function migrateToRoutineV2() {
     }
     const base = BASE_DEFS[id];
     // si el nombre lo habias puesto tu, se respeta; si era el de serie, pasa al de la rutina nueva
-    const ownName = report.created.indexOf(k) < 0 && (base ? !!c.customName && c.customName !== base.name : !!c.customName);
+    const ownName = report.created.indexOf(k) < 0 && !AUTO_NAMES_V3.has(c.customName) && (base ? !!c.customName && c.customName !== base.name : !!c.customName);
     if (!ownName) c.customName = (base && base.name === spec.name) ? "" : spec.name;
     if (base && base.target === spec.target) delete meta.target; else meta.target = spec.target;
     meta.zone = spec.zone;
