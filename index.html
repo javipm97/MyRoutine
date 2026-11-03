@@ -1429,6 +1429,11 @@ let currentUser = null;
 
 function emptyDoc() { return { customName: "", notes: "", history: [], photos: [], meta: {} }; }
 
+// Proteccion de datos: no se guarda nada hasta haber cargado bien lo que hay en Supabase,
+// y nunca se sustituye un historial con registros por uno vacio o mas corto sin querer
+let dataLoaded = false;
+const serverHistoryLen = {};
+
 // cache is filled synchronously so the UI never sees an undefined entry,
 // even before the data has finished loading
 const cache = {};
@@ -1457,7 +1462,12 @@ async function initDb() {
 
 async function startApp() {
   hideAuthScreen();
-  await loadAll();
+  const loaded = await loadAll();
+  if (!loaded) {
+    showToast("No se pudieron cargar tus datos. Reintentando...");
+    setTimeout(() => startApp(), 5000);
+    return;
+  }
   try { await migrateToRoutineV2(); } catch (e) { console.error("Error cargando la rutina nueva:", e); }
   try {
     const pending = JSON.parse(localStorage.getItem("pendingSettings") || "null");
@@ -1489,9 +1499,14 @@ function cacheFromRow(row) {
 }
 
 async function loadAll() {
-  if (!supabaseClient || !currentUser) return;
-  const { data, error } = await supabaseClient.from("exercise_logs").select("*");
-  if (error) { console.error("Error cargando datos:", error); return; }
+  if (!supabaseClient || !currentUser) return false;
+  let { data, error } = await supabaseClient.from("exercise_logs").select("*");
+  if (!error && (!data || data.length === 0)) {
+    // una respuesta vacia puede ser una sesion caducada: se refresca y se vuelve a mirar
+    try { await supabaseClient.auth.refreshSession(); } catch (e) {}
+    ({ data, error } = await supabaseClient.from("exercise_logs").select("*"));
+  }
+  if (error) { console.error("Error cargando datos:", error); return false; }
   const byId = {};
   (data || []).forEach(row => { byId[row.exercise_id] = row; });
 
@@ -1529,7 +1544,28 @@ async function loadAll() {
     STATIC_DAY_OF_EXERCISE[id] = parentDay;
   });
 
+  Object.keys(byId).forEach(id => {
+    serverHistoryLen[id] = Array.isArray(byId[id].history) ? byId[id].history.length : 0;
+  });
+  dataLoaded = true;
   rebuildLiveRoutine();
+  try { await weeklyBackup(data || []); } catch (e) { console.error("Error en la copia de seguridad:", e); }
+  return true;
+}
+
+// Copia de seguridad semanal dentro de Supabase (fila __backup__AAAA-MM-DD) con todo el historial
+async function weeklyBackup(rows) {
+  const backups = rows.filter(r => r.exercise_id.indexOf("__backup__") === 0).map(r => r.exercise_id.slice(10)).sort();
+  const today = new Date().toISOString().slice(0, 10);
+  const last = backups[backups.length - 1];
+  if (last && (new Date(today) - new Date(last)) < 7 * 864e5) return;
+  const data = rows.filter(r => r.exercise_id.indexOf("__backup__") !== 0)
+    .map(r => ({ exercise_id: r.exercise_id, custom_name: r.custom_name, notes: r.notes, history: r.history, photos: r.photos, meta: r.meta }));
+  if (!data.length) return;
+  await supabaseClient.from("exercise_logs").upsert({
+    exercise_id: "__backup__" + today, user_id: currentUser.id,
+    custom_name: "", notes: "", history: [], photos: [], meta: { at: Date.now(), rows: data }
+  }, { onConflict: "exercise_id" });
 }
 
 // ---------- Rutina v2 (oct 2026): Upper A / Lower A / Upper B / Lower B ----------
@@ -1647,7 +1683,7 @@ function planRoutineV2() {
 }
 
 async function migrateToRoutineV2() {
-  if (!supabaseClient || !currentUser) return;
+  if (!supabaseClient || !currentUser || !dataLoaded) return;
   if (settingsCache.routineVersion >= ROUTINE_V2.version) return;
   const R = ROUTINE_V2;
   const assign = planRoutineV2();
@@ -1771,8 +1807,19 @@ function showRoutineV2Summary() {
   if (ov) ov.addEventListener("click", e => { if (e.target === ov) markSeen(); });
 }
 
-async function persist(exId, quiet) {
+async function persist(exId, quiet, opts) {
   if (!supabaseClient || !currentUser) return false;
+  if (!dataLoaded) {
+    if (!quiet) showToast("Aun no se han cargado tus datos. Prueba en unos segundos");
+    return false;
+  }
+  const newLen = (cache[exId].history || []).length;
+  const allowShrink = opts && opts.allowShrink;
+  if (!allowShrink && newLen < (serverHistoryLen[exId] || 0)) {
+    console.error("Guardado bloqueado: el historial de " + exId + " bajaria de " + serverHistoryLen[exId] + " a " + newLen);
+    if (!quiet) showToast("No se guardo para no perder registros. Recarga la app");
+    return false;
+  }
   try {
     const { error } = await supabaseClient.from("exercise_logs").upsert({
       exercise_id: exId,
@@ -1788,6 +1835,7 @@ async function persist(exId, quiet) {
       if (!quiet) showToast("No se guardo: " + (error.message || "revisa Supabase"));
       return false;
     }
+    serverHistoryLen[exId] = newLen;
     return true;
   } catch (e) {
     console.error("Error guardando:", e);
@@ -1827,7 +1875,7 @@ function persistSettings() {
   return settingsChain;
 }
 async function persistSettingsNow() {
-  if (!supabaseClient || !currentUser) { savePendingLocal(); return false; }
+  if (!supabaseClient || !currentUser || !dataLoaded) { savePendingLocal(); return false; }
   try {
     const remote = await fetchRemoteSettings();
     if (remote && Array.isArray(remote.workouts)) settingsCache.workouts = mergeWorkouts(remote.workouts, settingsCache.workouts);
@@ -4354,7 +4402,7 @@ async function removeEntry(exId, dateKey, ask) {
   if (ask && !confirm(`Borrar ${displayName(exId)} del ${e.dateLabel}? Se borran sus series de ese dia.`)) return false;
   clearTimeout(autosaveTimers[exId]); delete autosaveTimers[exId];
   cache[exId].history = cache[exId].history.filter(h => h.dateKey !== dateKey);
-  const ok = await persist(exId);
+  const ok = await persist(exId, false, { allowShrink: true });
   refreshSummary(exId); renderCalendar(); refreshDayProgress(); refreshExtraCardSummaries();
   if (ok) showToast("Registro borrado");
   return ok;
@@ -4407,7 +4455,7 @@ function openWorkoutOptions(dayId, dateKey) {
     const ids = Object.keys(cache).filter(id => (cache[id].history || []).some(h => h.dateKey === dateKey && entryBelongsToDay(id, h, d)));
     ids.forEach(id => { cache[id].history = cache[id].history.filter(h => !(h.dateKey === dateKey && entryBelongsToDay(id, h, d))); });
     closeSheet();
-    await Promise.all(ids.map(id => persist(id)).concat([persistSettings()]));
+    await Promise.all(ids.map(id => persist(id, false, { allowShrink: true })).concat([persistSettings()]));
     ids.forEach(refreshSummary); renderCalendar(); renderFinishButton(); openDetail(dateKey);
     showToast("Entreno borrado");
   });
